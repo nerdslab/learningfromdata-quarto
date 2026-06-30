@@ -1,0 +1,48 @@
+name: notebooks
+
+# Verify every .ipynb is in sync with its paired py:percent .py file.
+# This is a fast, dependency-light check — it does NOT execute the notebooks.
+
+on:
+  push:
+    paths:
+      - "notebooks/**"
+      - ".github/workflows/notebooks.yml"
+  pull_request:
+    paths:
+      - "notebooks/**"
+      - ".github/workflows/notebooks.yml"
+
+jobs:
+  jupytext-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Pin to the same jupytext version used locally / in the pre-commit hook,
+      # so canonical formatting matches and the check doesn't flag version drift.
+      - name: Install jupytext
+        run: pip install "jupytext==1.19.4"
+
+      # Sync every notebook with its paired .py. On a clean, in-sync checkout this
+      # is a no-op. If a committed .ipynb and its .py disagree, sync rewrites one
+      # side to reconcile them, leaving the working tree dirty.
+      - name: Sync notebooks
+        run: |
+          find notebooks -name '*.ipynb' -print0 | xargs -0 -n1 jupytext --sync
+
+      # Fail if syncing changed anything: that means the committed pair was stale.
+      - name: Fail if notebooks were out of sync
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::Some notebooks are out of sync with their paired .py files."
+            echo "Fix locally with:  jupytext --sync \"notebooks/<Notebook_X>/<file>.py\""
+            echo "then commit the updated files. Files that differ:"
+            git --no-pager diff --name-only
+            exit 1
+          fi
+          echo "All notebooks are in sync. ✓"

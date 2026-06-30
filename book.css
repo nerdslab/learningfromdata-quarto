@@ -1,0 +1,12 @@
+/* The chapter titles already start with "Module N. ...", so Quarto's automatic
+   chapter-number prefix (the bare "1") is redundant. Hide it in both the page
+   title and the sidebar. Section numbers (.header-section-number, e.g. 1.2.8)
+   are left intact. */
+.chapter-number {
+  display: none;
+}
+
+/* Drop the now-dangling non-breaking space that followed the chapter number. */
+h1.title .chapter-title {
+  margin-left: 0;
+}

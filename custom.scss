@@ -1,0 +1,16 @@
+/*-- scss:defaults --*/
+
+// Base font size for the whole deck (revealjs default is 40px — too big for
+// dense lecture slides). Lower this single value to shrink everything
+// proportionally; raise it for a bigger room / projector.
+$presentation-font-size-root: 26px;
+
+// Heading sizes are multiples of the root. Keep titles modest so content-heavy
+// slides fit without overflowing.
+$presentation-h1-font-size: 1.6em;
+$presentation-h2-font-size: 1.3em;
+$presentation-h3-font-size: 1.1em;
+$presentation-h4-font-size: 1.0em;
+
+// Tighten line spacing a little so bullet lists pack in more.
+$presentation-line-height: 1.3;

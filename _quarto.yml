@@ -1,0 +1,18 @@
+project:
+  type: default
+  output-dir: _slides
+  render:
+    - notebooks/**/*.ipynb
+
+format:
+  revealjs:
+    theme: [simple, custom.scss]  # base theme + our font-size overrides
+    slide-number: true
+    chalkboard: true       # draw/annotate on slides during class
+    code-fold: false       # show code by default
+    scrollable: true       # long slides can scroll instead of overflow
+    incremental: true      # bullet points appear one at a time
+    highlight-style: github
+    execute:
+      echo: true
+      eval: false          # use pre-executed outputs from the .ipynb

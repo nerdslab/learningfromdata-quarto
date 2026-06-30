@@ -1,0 +1,40 @@
+[project]
+name = "learningfromdata-course"
+version = "0.0.0"
+description = "Course materials for ENM 3800: Learning from Data (UPenn, Fall 2026)"
+requires-python = ">=3.11"
+
+# Runtime dependencies imported by the module notebooks (notebooks/Notebook_1 .. Notebook_5).
+dependencies = [
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "scipy>=1.13",
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+    "scikit-learn>=1.5",
+    "scikit-image>=0.24",
+    "imbalanced-learn>=0.12",
+    "torch>=2.2",
+    "torchvision>=0.17",
+    "medmnist>=3.0",
+    "tqdm>=4.66",
+    "ipython>=8.0",
+    "ipywidgets>=8.0",
+    "art>=6.0",
+]
+
+[project.optional-dependencies]
+# Tooling for the Jupytext workflow (pairing, syncing, executing notebooks).
+# See the "Working with Notebooks (Jupytext)" section of README.md.
+dev = [
+    "jupytext>=1.16",
+    "nbconvert>=7.0",
+    "ipykernel>=6.0",
+    "notebook>=7.0",
+    "pre-commit>=3.0",
+]
+
+# This repo is course materials, not an importable Python package, so uv should
+# manage the environment without trying to build/install a package from it.
+[tool.uv]
+package = false

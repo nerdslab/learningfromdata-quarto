@@ -1,0 +1,20 @@
+# Welcome {.unnumbered}
+
+These are the course notebooks for **ENM 3800: Learning from Data**.
+
+Each chapter corresponds to a Jupyter notebook covering one topic, organized
+into five modules:
+
+- **Module 1 — Learning from Data:** what it means to learn from data, and the
+  Python / linear-algebra foundations.
+- **Module 2 — Building & Selecting Models:** fitting models and choosing
+  between them.
+- **Module 3 — Probability & Inference:** probability, hypothesis testing,
+  and resampling.
+- **Module 4 — Supervised Learning:** regression, classification, and neural
+  networks.
+- **Module 5 — Unsupervised Learning:** dimensionality reduction and
+  clustering.
+
+Use the sidebar to navigate between chapters, and the search box to find a
+topic. Each chapter has an "Open in Colab" link to run the code interactively.
