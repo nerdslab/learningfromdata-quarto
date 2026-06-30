@@ -1,0 +1,64 @@
+name: deploy-book
+
+# Build the Quarto book and publish it to GitHub Pages.
+#
+# The book renders from the OUTPUTS already embedded in each .ipynb
+# (eval: false in _quarto-book.yml), so this job does NOT install the heavy
+# notebook dependencies (torch, medmnist, ...) and does NOT execute anything.
+# It only needs Quarto plus a Python/Jupyter stack so Quarto can read the
+# notebooks. The actual build is delegated to scripts/render_book.sh, which is
+# the single source of truth for how the book is assembled.
+
+on:
+  push:
+    branches: [main]
+  # Allow manual runs from the Actions tab.
+  workflow_dispatch:
+
+# Least-privilege token scopes required by the Pages deploy.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deploy at a time; don't cancel an in-progress one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Quarto's jupyter engine needs nbformat/nbclient available to read the
+      # .ipynb inputs, even though no cells are executed (eval: false).
+      - name: Install Jupyter (read-only, no notebook deps)
+        run: pip install jupyter
+
+      - name: Render book
+        run: scripts/render_book.sh
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _book
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
