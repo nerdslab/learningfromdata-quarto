@@ -13,7 +13,7 @@
 # ---
 
 # %% [markdown] id="nb1a-title"
-# # Learning From Data: Overview & Data Representation
+# # Overview & Data Representation
 #
 # **Course Title:** ENM 3800: Learning from Data
 #
