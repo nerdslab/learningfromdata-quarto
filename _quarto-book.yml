@@ -22,9 +22,9 @@ book:
         - notebooks/Notebook_2/Notebook_2b_Model_Selection.ipynb
     - part: "Module 3: Probability & Inference"
       chapters:
-        - notebooks/Notebook_3/Notebook_3a_Probability_and_Covariance.ipynb
-        - notebooks/Notebook_3/Notebook_3b_Hypothesis_Testing.ipynb
-        - notebooks/Notebook_3/Notebook_3c_Bootstrapping_and_Permutation_Tests.ipynb
+        - notebooks/Notebook_3/Notebook_3a_Probability.ipynb
+        - notebooks/Notebook_3/Notebook_3b_Statistics_1.ipynb
+        - notebooks/Notebook_3/Notebook_3c_Statistics_2.ipynb
     - part: "Module 4: Supervised Learning"
       chapters:
         - notebooks/Notebook_4/Notebook_4a_Regression.ipynb

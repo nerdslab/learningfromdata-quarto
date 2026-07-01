@@ -14,7 +14,7 @@
 # ---
 
 # %% [markdown]
-# # Hypothesis Testing and Confidence Intervals
+# # Statistics 1
 #
 # **Course Title:** ENM 3800: Learning from Data
 #
@@ -22,15 +22,17 @@
 #
 # **Lecture:** 9 — Oct 13
 #
-# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3b_Hypothesis_Testing.ipynb)
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3b_Statistics_1.ipynb)
 #
 # This notebook covers:
 #
-# 3. Hypothesis testing and confidence intervals (t-test, ANOVA, paired t-test)
+# 1. Describing relationships between variables: covariance and correlation
+# 2. Hypothesis testing and confidence intervals (t-test, ANOVA, paired t-test)
+# 3. Two kinds of mistake: Type I and Type II errors
 #
 # Big theme:
 #
-# > A small p-value means the data are unlikely under the null — not that the null is false.
+# > The Central Limit Theorem told us the sample mean is approximately Gaussian with spread $\sigma/\sqrt{n}$. Statistics turns that fact into decisions — quantifying relationships, attaching uncertainty to estimates, and testing whether an effect is larger than sampling noise. A small p-value means the data are unlikely under the null — not that the null is false.
 
 # %% id="JPVDdAbgKX63"
 # Setup
@@ -76,8 +78,129 @@ def show_widget_or_fallback(widget_fn, fallback_fn):
 # %%
 penguins = sns.load_dataset("penguins").dropna()
 
+# %% [markdown] id="wOy0NdYOMba-"
+# ## Describing Relationships: Covariance and Correlation
+#
+# In the Probability notebook we described a *single* random variable by its
+# expectation and variance. Most data, though, come with several variables at once,
+# and the first statistical question is usually: **do they move together?**
+#
+# ### Covariance
+#
+# For **two random variables** $X$ and $Y$, the **covariance** generalizes variance
+# to a pair:
+#
+# $$
+# \mathrm{Cov}(X, Y) = \mathbb{E}[(X - \mathbb{E}[X])(Y - \mathbb{E}[Y])].
+# $$
+#
+# - If $\mathrm{Cov}(X, Y) > 0$, large values of $X$ tend to go with large values of $Y$.
+# - If $\mathrm{Cov}(X, Y) < 0$, large values of $X$ tend to go with small values of $Y$.
+# - If $\mathrm{Cov}(X, Y) \approx 0$, there may be no linear relationship.
+#
+# **Example.** Height and the chance of playing in the NBA tend to move together, since taller people are more likely to play, so their covariance is positive. By contrast, a car's mileage and its resale price move in opposite directions, because higher mileage generally means a lower price, so their covariance is negative.
+#
+# Note that the covariance of a variable with itself is just its variance: $\mathrm{Cov}(X, X) = \mathrm{Var}(X)$.
+#
+# ### Correlation
+#
+# The **correlation** is a normalized version of covariance:
+#
+# $$
+# \rho_{X,Y} = \frac{\mathrm{Cov}(X, Y)}{\sqrt{\mathrm{Var}(X)\,\mathrm{Var}(Y)}}.
+# $$
+#
+# It takes values in $[-1, 1]$ and is easier to compare across different variable scales. We will mostly estimate covariance and correlation from data.
+#
+
+# %% [markdown] id="gALruupNNxJY"
+# ### Example: Simulating correlated variables
+#
+
+# %% colab={"base_uri": "https://localhost:8080/", "height": 533} id="VDqnfLxcNUwD"
+# Simulate two correlated variables
+n = 500
+x = np.random.normal(0, 1, size=n)
+noise = np.random.normal(0, 0.5, size=n)
+y = 2 * x + noise  # y is roughly a linear function of x
+
+print("Sample covariance:", np.cov(x, y, bias=False)[0, 1])
+print("Sample correlation:", np.corrcoef(x, y)[0, 1])
+
+sns.scatterplot(x=x, y=y)
+plt.xlabel("x")
+plt.ylabel("y")
+plt.title("Simulated correlated variables")
+plt.show()
+
+
+# %% [markdown] id="YVJpJAl8OCHV"
+# #### Coding Challenge:
+#
+# You can modify the relationship between `x` and `y` above (e.g., change the slope or noise level) and see how the covariance and correlation change.
+
+# %% [markdown] id="ep2WJLcDOfZ1"
+# ### Correlation in a real dataset
+#
+# We will look at relationships between the numeric features of the `penguins` dataset.
+#
+
+# %% colab={"base_uri": "https://localhost:8080/", "height": 600} id="UHkWnuhVN_-P"
+#| code-fold: true
+numeric_cols = penguins.select_dtypes(include=[np.number]).columns
+corr = penguins[numeric_cols].corr()
+
+sns.heatmap(corr, annot=True, cmap="coolwarm", vmin=-1, vmax=1)
+plt.title("Correlation matrix (penguins)")
+plt.show()
+
+
+# %% [markdown] id="enCxVNsgPf1y"
+# #### Coding Challenge:
+# Look at the correlation matrix. Which pairs of variables appear to be most strongly related? Which are weakly related?
+#
+
+# %% [markdown] id="ex-beyond-correlation-matrix"
+# ### Visual Exercise: Beyond the Correlation Matrix
+#
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3b_Statistics_1.ipynb#scrollTo=ex-beyond-correlation-matrix)
+#
+# A correlation matrix gives a compact summary, but it can hide important structure.
+#
+# A scatterplot matrix lets us see relationships, outliers, clusters, and nonlinear patterns.
+#
+
+# %%
+sns.pairplot(
+    penguins,
+    vars=["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"],
+    hue="species",
+    corner=True,
+    plot_kws={"alpha": 0.7},
+)
+plt.suptitle("Penguins: Pairwise Relationships by Species", y=1.02)
+plt.show()
+
+# %% [markdown] id="ex-correlation-plus-context"
+# #### Exercise: Correlation Plus Context
+#
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3b_Statistics_1.ipynb#scrollTo=ex-correlation-plus-context)
+#
+# Choose one pair of variables from the pairplot.
+#
+# 1. Is the relationship positive, negative, or weak?
+# 2. Does the relationship look the same within each species?
+# 3. Is the overall correlation possibly influenced by species differences?
+# 4. What would be misleading about reporting only one correlation number?
+#
+
 # %% [markdown] id="5GgM0a7hPoDy"
 # ## Hypothesis Testing and Confidence Intervals
+#
+# Covariance and correlation *describe* the data in front of us. But we usually want
+# to reach past the sample to the population it came from: is an observed difference
+# **real**, or just the sampling noise the Central Limit Theorem taught us to
+# expect? That leap — from description to inference — is hypothesis testing.
 #
 # ### Framing a question
 #
@@ -121,6 +244,34 @@ penguins = sns.load_dataset("penguins").dropna()
 # ::: {.callout-warning title="Choose α before collecting the data"}
 # The significance level is the threshold of "unlikeliness" you require before you are willing to reject $H_0$, and it must be fixed *in advance*. If you collect the data first and then pick $\alpha$ (or keep testing until something looks significant), you can almost always manufacture a "significant" result by chance. Setting $\alpha$ up front keeps the test honest.
 # :::
+#
+
+# %% [markdown]
+# ### Two kinds of mistake: Type I and Type II errors
+#
+# Because a test is a *decision under uncertainty*, it can be wrong in two different
+# ways. Whatever we decide, the truth about $H_0$ is fixed but unknown, so there are
+# four possible outcomes:
+#
+# | | $H_0$ is true | $H_0$ is false |
+# |---|---|---|
+# | **Reject $H_0$** | ❌ Type I error (false positive) | ✅ correct — a true effect detected |
+# | **Fail to reject $H_0$** | ✅ correct | ❌ Type II error (false negative) |
+#
+# - A **Type I error** is declaring an effect that is not real. This is exactly the
+#   risk we control with the significance level: $\alpha = P(\text{reject } H_0 \mid H_0 \text{ true})$.
+#   Choosing $\alpha = 0.05$ means we accept a 5% chance of a false positive.
+# - A **Type II error** is *missing* a real effect. Its probability is called
+#   $\beta = P(\text{fail to reject } H_0 \mid H_0 \text{ false})$.
+# - The **power** of a test is $1 - \beta$: the probability of detecting an effect
+#   that is genuinely there.
+#
+# This reframes an earlier warning. When we "fail to reject $H_0$," we are not
+# proving $H_0$ — we may simply have too little power to see a real effect (a Type II
+# error). Small samples and noisy measurements both drain power. We *quantify* power
+# in the next notebook, and the same false-positive / false-negative distinction
+# returns in supervised learning as the false positives and false negatives of a
+# confusion matrix.
 #
 
 # %% [markdown]
@@ -453,7 +604,7 @@ show_widget_or_fallback(
 # %% [markdown] id="ex-what-makes-evidence-stronger"
 # #### Exercise: What Makes Evidence Stronger?
 #
-# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3b_Hypothesis_Testing.ipynb#scrollTo=ex-what-makes-evidence-stronger)
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3b_Statistics_1.ipynb#scrollTo=ex-what-makes-evidence-stronger)
 #
 # Use the sliders.
 #
@@ -464,99 +615,28 @@ show_widget_or_fallback(
 #
 
 # %% [markdown] id="VWNM8kQGWC3q"
-# ### Sampling Distributions: Where t-tests Come From
+# ### Where t-tests come from: a callback to the CLT
 #
-# A key idea behind all of our statistical tests is the **sampling distribution**:
-#
-# > If we repeatedly sampled from the same population and recomputed a statistic (like the mean, or the difference in means), how would that statistic vary?
-#
-# We almost never see all possible samples; we only see **one**.
-# But we can simulate to build intuition.
-#
-# We will:
-#
-# 1. Draw many repeated samples from a known distribution.
-# 2. Compute the **sample mean** each time.
-# 3. Look at the distribution of these means.
-#
-# We will see:
-#
-# - Individual data values are noisy and spread out.
-# - The **sample mean** is less variable.
-# - As sample size increases, the sampling distribution gets narrower.
-#
-
-# %% colab={"base_uri": "https://localhost:8080/", "height": 401} executionInfo={"elapsed": 1190, "status": "ok", "timestamp": 1766245930695, "user": {"displayName": "Eva Dyer", "userId": "13751912255938119410"}, "user_tz": 300} id="bRksoC1cWHoc" outputId="4636b364-0655-464b-aed8-013db5c5b25b"
-rng = np.random.default_rng(42)
-
-
-def sample_means(n_samples=1000, sample_size=20, mu=0, sigma=1):
-    means = []
-    for _ in range(n_samples):
-        x = rng.normal(mu, sigma, size=sample_size)
-        means.append(x.mean())
-    return np.array(means)
-
-
-# Compare sampling distributions for different sample sizes
-means_n5 = sample_means(sample_size=5)
-means_n100 = sample_means(sample_size=100)
-means_n10000 = sample_means(sample_size=10000)
-
-fig, axes = plt.subplots(1, 3, figsize=(15, 4), sharey=True)
-
-for ax, data, n in zip(axes, [means_n5, means_n100, means_n10000], [5, 100, 10000]):
-    sns.histplot(data, kde=True, ax=ax)
-    ax.axvline(data.mean(), color="red", label="Mean of means")
-    ax.set_title(f"Sampling distribution (n = {n})")
-    ax.set_xlabel("Sample mean")
-    ax.legend()
-
-plt.tight_layout()
-plt.show()
-
-
-# %% [markdown] id="9oVH00b8WQJa"
-# As the sample size **n** increases:
-#
-# - Each individual sample is still noisy.
-# - But the **mean** bounces around less.
-# - The sampling distribution narrows.
-#
-# This is why:
-#
-# - Standard errors shrink with larger \(n\).
-# - Confidence intervals get tighter.
-# - t-tests become more powerful with larger samples.
-#
-# The t-test is built around this idea: how large is our observed difference, **relative to the variability** we would expect from sampling?
-#
-
-# %% [markdown]
-# ### Visual Summary: Standard Error Shrinks With Sample Size
-#
-# The standard error of the mean is:
+# Everything in this section rests on the **sampling distribution** — how a statistic
+# like the difference in means would vary if we repeated the whole data collection.
+# We built that idea in the Probability notebook: the Central Limit Theorem showed
+# that the sample mean is approximately Gaussian, and that its spread is the standard
+# error
 #
 # $$
-# SE = \frac{\sigma}{\sqrt{n}}
+# SE = \frac{\sigma}{\sqrt{n}}.
 # $$
 #
-# This means uncertainty decreases with sample size, but not linearly. To cut the standard error in half, we need about four times as many samples.
+# That is exactly why the t-test works the way it does:
 #
-
-# %%
-#| code-fold: true
-n_values = np.arange(5, 501)
-sigma = 1
-standard_errors = sigma / np.sqrt(n_values)
-
-plt.figure(figsize=(7, 4))
-plt.plot(n_values, standard_errors, color="steelblue")
-plt.xlabel("sample size n")
-plt.ylabel("standard error")
-plt.title("Standard Error Shrinks as Sample Size Increases")
-clean_axes(plt.gca())
-plt.show()
+# - larger $n$ shrinks the standard error, so confidence intervals get tighter and
+#   tests become more **powerful**;
+# - the t-statistic asks how large our observed difference is *relative to* this
+#   sampling variability.
+#
+# So the t-test is not a new idea — it is the CLT put to work on a difference in
+# means.
+#
 
 # %% [markdown] id="2Ih9zEFqWzWA"
 # #### Coding Challenge:
@@ -743,7 +823,7 @@ print(f"Paired t-test: t = {paired_t:.3f}, p = {paired_p:.5f}")
 # %% [markdown] id="ex-exercise"
 # #### Exercise:
 #
-# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3b_Hypothesis_Testing.ipynb#scrollTo=ex-exercise)
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3b_Statistics_1.ipynb#scrollTo=ex-exercise)
 #
 
 # %% colab={"base_uri": "https://localhost:8080/"} executionInfo={"elapsed": 5, "status": "ok", "timestamp": 1766245931645, "user": {"displayName": "Eva Dyer", "userId": "13751912255938119410"}, "user_tz": 300} id="c-hEQjzdZw6N" outputId="4cf6d272-4512-43b2-939e-65da101b829b"

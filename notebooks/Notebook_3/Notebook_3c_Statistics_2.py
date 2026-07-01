@@ -14,7 +14,7 @@
 # ---
 
 # %% [markdown]
-# # Bootstrapping, Permutation Tests, and Noisy Measurements
+# # Statistics 2
 #
 # **Course Title:** ENM 3800: Learning from Data
 #
@@ -22,14 +22,18 @@
 #
 # **Lecture:** 10 — Oct 20
 #
-# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Bootstrapping_and_Permutation_Tests.ipynb)
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Statistics_2.ipynb)
 #
 # This notebook covers:
 #
-# 4. Bootstrapping
-# 5. Permutation tests
-# 6. Noisy measurements and statistical power
-# 7. Summary and exercises
+# 1. Bootstrapping — building confidence intervals by resampling the data
+# 2. Permutation tests — building a null distribution by shuffling labels
+# 3. Noisy measurements, statistical power, and Type II error
+# 4. Summary and exercises
+#
+# Big theme:
+#
+# > When formulas are hard or their assumptions shaky, we can *resample* the data itself — reshuffling and redrawing it — to see how a statistic varies and whether an effect could be chance. The same simulations let us quantify **power**: how often a real effect is actually detected.
 
 # %% id="JPVDdAbgKX63"
 # Setup
@@ -171,7 +175,7 @@ show_widget_or_fallback(bootstrap_widget, lambda: plot_bootstrap_ci(n_boot=500, 
 # %% [markdown] id="ex-bootstrap-stability"
 # #### Exercise: Bootstrap Stability
 #
-# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Bootstrapping_and_Permutation_Tests.ipynb#scrollTo=ex-bootstrap-stability)
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Statistics_2.ipynb#scrollTo=ex-bootstrap-stability)
 #
 # 1. Try `n_boot=50` with several seeds. How much does the interval move?
 # 2. Try `n_boot=5000`. Is it more stable?
@@ -277,7 +281,7 @@ plt.show()
 # %% [markdown] id="ex-permutation-logic"
 # #### Exercise: Permutation Logic
 #
-# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Bootstrapping_and_Permutation_Tests.ipynb#scrollTo=ex-permutation-logic)
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Statistics_2.ipynb#scrollTo=ex-permutation-logic)
 #
 # 1. What does one shuffled dataset represent?
 # 2. Why does shuffling labels simulate the null hypothesis?
@@ -346,9 +350,18 @@ evaluate(very_noisy1, very_noisy2, "High noise added")
 # %% [markdown]
 # ### Interactive Demo: Noise, Sample Size, and Power
 #
-# Power is the probability that a test detects an effect when the effect is really present.
+# In **Statistics 1** we named two mistakes a test can make: a **Type I
+# error** (a false positive, controlled by $\alpha$) and a **Type II error** (missing
+# a real effect, with probability $\beta$). Here we finally *measure* the second one.
 #
-# This simulation repeats the same experiment many times and estimates how often the p-value is below 0.05.
+# The **power** of a test is $1 - \beta$: the probability of detecting an effect that
+# is genuinely present. When the effect below is real, every experiment that comes
+# back with $p \ge 0.05$ is a Type II error — a real difference we failed to catch.
+#
+# This simulation repeats the same experiment many times and estimates the power as
+# the fraction of runs with a p-value below the $\alpha = 0.05$ threshold. Watch how
+# power collapses as noise grows or the sample shrinks — and how it recovers as $n$
+# increases.
 #
 
 
@@ -402,7 +415,7 @@ show_widget_or_fallback(
 # %% [markdown] id="ex-designing-better-experiment"
 # #### Exercise: Designing a Better Experiment
 #
-# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Bootstrapping_and_Permutation_Tests.ipynb#scrollTo=ex-designing-better-experiment)
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Statistics_2.ipynb#scrollTo=ex-designing-better-experiment)
 #
 # Use the power demo.
 #
@@ -424,7 +437,7 @@ show_widget_or_fallback(
 #   - sample size needs?
 #
 # Key takeaway:
-# > Noise does not "erase" signal, but it makes it harder to see. Uncertainty increases, p-values increase, and confidence intervals widen.
+# > Noise does not "erase" signal, but it makes it harder to see. Uncertainty increases, p-values increase, and confidence intervals widen — so the chance of a **Type II error** (missing a real effect) goes up and power goes down. A non-significant result in a noisy, small study is not evidence that nothing is there.
 #
 
 # %% [markdown] id="8gcdAgYoTuWO"
@@ -432,26 +445,29 @@ show_widget_or_fallback(
 #
 # In this notebook, we:
 #
-# - Introduced probability and random variables as ways to describe uncertainty.
-# - Explored covariance and correlation as measures of how variables move together.
-# - Framed hypothesis testing and confidence intervals for comparing groups.
-# - Used classical tools (t-tests) on a real dataset.
-# - Implemented bootstrap confidence intervals for means.
-# - Implemented a permutation test to compare group means and built an empirical null distribution.
+# - Implemented **bootstrap** confidence intervals for a mean by resampling the data with replacement.
+# - Built a **permutation test**, generating an empirical null distribution by shuffling group labels.
+# - Simulated how **noise and sample size** control **statistical power** ($1 - \beta$), and saw how easily a real effect produces a **Type II error** when power is low.
 #
-# These tools form the statistical backbone for evaluating models and reasoning about uncertainty in later parts of the course.
+# This completes **Module 3**, which moved from probability to inference:
+#
+# - **Probability** — distributions and their generating processes, ending in the Central Limit Theorem.
+# - **Statistics 1** — covariance/correlation, confidence intervals, and hypothesis tests (t-test, ANOVA, paired t-test), with Type I and Type II errors.
+# - **Statistics 2** — simulation-based inference (bootstrap, permutation) and statistical power.
+#
+# Together these tools form the statistical backbone for evaluating models and reasoning about uncertainty in later parts of the course.
 #
 
 # %% [markdown] id="ex-exercise"
 # ## Additional Exercises:
 #
-# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Bootstrapping_and_Permutation_Tests.ipynb#scrollTo=ex-exercise)
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Statistics_2.ipynb#scrollTo=ex-exercise)
 #
 
 # %% [markdown] id="ex-diabetes-dataset-inference"
 # ## 🧪 Diabetes Dataset Inference Exercises
 #
-# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Bootstrapping_and_Permutation_Tests.ipynb#scrollTo=ex-diabetes-dataset-inference)
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Statistics_2.ipynb#scrollTo=ex-diabetes-dataset-inference)
 #
 # You will now apply hypothesis testing and resampling methods to the Diabetes dataset.
 #
