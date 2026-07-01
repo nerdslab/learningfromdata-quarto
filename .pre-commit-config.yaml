@@ -1,7 +1,6 @@
 # Pre-commit hooks for the course repo.
 #
 # Commit-stage (sync) — enable once:   pre-commit install
-# Push-stage (execute) — enable once:  pre-commit install --hook-type pre-push
 # Run manually:                        pre-commit run --all-files --hook-stage <stage>
 repos:
   - repo: https://github.com/mwouts/jupytext
@@ -12,17 +11,8 @@ repos:
       - id: jupytext
         args: [--sync]
 
-  - repo: local
-    hooks:
-      # On push, execute any changed notebooks so their outputs (plots, images)
-      # are embedded and visible to anyone viewing the .ipynb. Runs only on the
-      # notebooks being pushed. If execution changes outputs, the push aborts —
-      # commit the re-rendered notebook, then push again. Requires the runtime
-      # deps installed (uv sync --extra dev + notebook deps). Opt in with:
-      #     pre-commit install --hook-type pre-push
-      - id: execute-notebooks
-        name: execute notebooks to embed outputs
-        entry: scripts/execute_notebooks.sh
-        language: system
-        files: \.ipynb$
-        stages: [pre-push]
+# Note: embedding notebook outputs is a manual step — run
+# scripts/execute_notebooks.sh before pushing when plots are stale. It is
+# intentionally NOT a pre-push hook: re-executing notebooks is non-deterministic
+# (random cell IDs on jupytext round-trips, random demo output), so it would
+# change files on every run and permanently block pushes.
