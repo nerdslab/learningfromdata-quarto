@@ -858,6 +858,13 @@ def plot_matrix_flow_and_morph_gif(
     displacement = (A @ points.T).T - points
     arrow_length = np.linalg.norm(displacement, axis=1)
 
+    # Grid lines (not just points) so the right panel shows the grid itself
+    # warping as the matrix is applied, not just where the nodes land.
+    line_coords = np.linspace(-2, 2, grid_size)
+    fine = np.linspace(-2, 2, 25)
+    grid_lines = [np.stack([fine, np.full_like(fine, c)], axis=1) for c in line_coords]
+    grid_lines += [np.stack([np.full_like(fine, c), fine], axis=1) for c in line_coords]
+
     frames = []
     for t in np.linspace(0, 1, n_frames):
         A_t = (1 - t) * np.eye(2) + t * A
@@ -879,8 +886,16 @@ def plot_matrix_flow_and_morph_gif(
         )
         ax_flow.scatter(points[:, 0], points[:, 1], s=10, color="black", alpha=0.35)
         ax_flow.set_title("Flow Field ($Ax - x$)")
+        ax_flow.grid(True, linewidth=0.5, alpha=0.3)
 
-        ax_grid.scatter(transformed[:, 0], transformed[:, 1], s=24, color="teal")
+        for line in grid_lines:
+            warped_line = (A_t @ line.T).T
+            ax_grid.plot(
+                warped_line[:, 0], warped_line[:, 1], color="0.75", linewidth=0.8
+            )
+        ax_grid.scatter(
+            transformed[:, 0], transformed[:, 1], s=24, color="teal", zorder=3
+        )
         ax_grid.set_title(f"Grid at $t={t:.2f}$")
 
         for ax in (ax_flow, ax_grid):
@@ -1028,9 +1043,6 @@ A = np.array([[1.2, 0.6], [-0.3, 1.1]])
 plot_matrix_flow_and_morph_gif(
     A, title="General Matrix: Stretching, Rotating, and Mixing"
 )
-
-# Optional: show where the same points land after the transformation.
-plot_matrix_before_after(A, title="Before and After the General Matrix Transformation")
 
 # %% [markdown] id="ex-matrix-diagnose"
 # ### Exercise: Diagnose a Matrix Transformation
