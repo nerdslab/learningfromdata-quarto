@@ -119,6 +119,8 @@ best_idx = np.argmin(values)
 best_beta = candidates[best_idx]
 best_loss = values[best_idx]
 
+# %%
+#| code-fold: true
 plt.figure(figsize=(7, 5))
 plt.plot(candidates, values, label="loss function")
 plt.scatter(best_beta, best_loss, color="red", s=80, label="Best found")
@@ -220,6 +222,8 @@ for _ in range(20):
     beta = beta - eta * grad(beta)
     trajectory.append(beta)
 
+# %%
+#| code-fold: true
 # Plot
 b = np.linspace(-6, 6, 200)
 plt.figure(figsize=(7, 5))
