@@ -136,8 +136,10 @@ fig.colorbar(im, ax=axes[0, :], shrink=0.75, label='covariance value')
 plt.show()
 
 
-# %% [markdown]
-# ### Discussion: reading covariance as geometry
+# %% [markdown] id="ex-covariance-shapes"
+# ### Exercise: reading covariance as geometry
+#
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_5/Notebook_5a_DimReduction.ipynb#scrollTo=ex-covariance-shapes)
 #
 # For each panel, answer before looking at the matrix values:
 #
@@ -146,6 +148,61 @@ plt.show()
 # 3. If you had to keep only one new axis, where would you place it?
 #
 # That last question is the intuition behind the first principal component.
+#
+
+# %% [markdown]
+# ### Interactive demo: covariance shape explorer
+#
+# Use the sliders to change each feature's spread and the correlation between them,
+# and watch the eigenvectors (the future principal components) track the cloud.
+#
+
+# %%
+def plot_covariance_explorer(std_x=2.0, std_y=0.6, rho=0.7, n=500, seed=0):
+    rho = np.clip(rho, -0.98, 0.98)
+    cov_xy = rho * std_x * std_y
+    cov = np.array([[std_x**2, cov_xy], [cov_xy, std_y**2]])
+    X_explore = np.random.default_rng(seed).multivariate_normal([0, 0], cov, size=n)
+
+    fig, ax = plt.subplots(figsize=(6, 6))
+    ax.scatter(X_explore[:, 0], X_explore[:, 1], s=14, alpha=0.35)
+    values, vectors = add_covariance_ellipse(ax, cov, edgecolor='black', linewidth=2)
+    for j, color in enumerate(['crimson', 'navy']):
+        direction = vectors[:, j] * np.sqrt(values[j]) * 2
+        ax.arrow(0, 0, direction[0], direction[1], color=color, width=0.035,
+                  length_includes_head=True, label=f'eigenvector {j + 1}, eigenvalue={values[j]:.2f}')
+    ax.axhline(0, color='0.85')
+    ax.axvline(0, color='0.85')
+    ax.set_xlim(-7, 7)
+    ax.set_ylim(-7, 7)
+    ax.set_aspect('equal')
+    ax.legend(loc='upper left', fontsize=9)
+    ax.set_title(f'std_x={std_x}, std_y={std_y}, rho={rho:.2f}')
+    plt.show()
+
+try:
+    import ipywidgets as widgets
+    widgets.interact(
+        plot_covariance_explorer,
+        std_x=widgets.FloatSlider(value=2.0, min=0.2, max=4.0, step=0.1),
+        std_y=widgets.FloatSlider(value=0.6, min=0.2, max=4.0, step=0.1),
+        rho=widgets.FloatSlider(value=0.7, min=-0.95, max=0.95, step=0.05),
+    )
+except Exception:
+    plot_covariance_explorer(std_x=2.0, std_y=0.6, rho=0.7)
+
+
+# %% [markdown] id="ex-covariance-explorer"
+# ### Exercise: covariance explorer
+#
+# [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_5/Notebook_5a_DimReduction.ipynb#scrollTo=ex-covariance-explorer)
+#
+# Use the sliders.
+#
+# 1. Set `rho = 0`. What happens to the eigenvector directions?
+# 2. Set `std_x` much larger than `std_y`. What happens to the two eigenvalues?
+# 3. Push `rho` close to 1, then close to -1. How does the tilt change?
+# 4. Why is the largest eigenvalue's eigenvector the natural first principal component?
 #
 
 # %% [markdown]

@@ -632,9 +632,8 @@ dist = np.sqrt(np.sum((v - w) ** 2))
 print(dist)
 
 
-import matplotlib.pyplot as plt
-
 # %% colab={"base_uri": "https://localhost:8080/", "height": 638} executionInfo={"elapsed": 371, "status": "ok", "timestamp": 1766276548179, "user": {"displayName": "Eva Dyer", "userId": "13751912255938119410"}, "user_tz": 300} id="MLfpv8bmu0RF" outputId="012eef62-4041-4485-af06-f1b4de3307da"
+import matplotlib.pyplot as plt
 import numpy as np
 
 # Create grid
@@ -647,6 +646,8 @@ points = np.stack([X, Y], axis=-1)  # shape (N,N,2)
 L2 = np.linalg.norm(points, ord=2, axis=-1)
 L1 = np.linalg.norm(points, ord=1, axis=-1)
 
+# %%
+#| code-fold: true
 plt.figure(figsize=(6, 6))
 
 # Draw contour where norm = 1
@@ -796,6 +797,7 @@ print("\nResult A x:\n", Ax)
 #
 
 # %%
+#| code-fold: true
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -1269,6 +1271,8 @@ R = rgb[:, :, 0]
 G = rgb[:, :, 1]
 B = rgb[:, :, 2]
 
+# %%
+#| code-fold: true
 fig, ax = plt.subplots(1, 4, figsize=(14, 4))
 
 ax[0].imshow(rgb)
