@@ -2,12 +2,11 @@
 #
 # Render all notebooks into a textbook-style HTML site (Quarto book): scrollable
 # pages, a sidebar with every chapter, full-text search, and per-page tables of
-# contents. This is the "read / reference" view, complementing the slides view
-# (scripts/render_slides.sh).
+# contents.
 #
-# Same Jupytext caveat as the slides script: a normal "quarto render" finds 0
-# inputs because the .py pair shadows each .ipynb, so we render from a clean
-# build dir containing only the .ipynb files plus the book config.
+# Jupytext caveat: a normal "quarto render" finds 0 inputs because the .py pair
+# shadows each .ipynb, so we render from a clean build dir containing only the
+# .ipynb files plus the book config.
 #
 # Usage:
 #   scripts/render_book.sh

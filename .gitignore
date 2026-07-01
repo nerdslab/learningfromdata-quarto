@@ -10,7 +10,6 @@ learningfromdata_course.egg-info/
 .quarto/
 *_files/
 notebooks/**/*.html
-_slides/
 _book/
 
 /.quarto/

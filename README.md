@@ -74,7 +74,7 @@ Notes:
 - Activate the venv once per terminal session (`source venv/bin/activate`) and all commands
   work without any prefix. Run `deactivate` when done.
 - `--sync` matches the pair by base filename in the same folder, so the `.ipynb` and `.py`
-  must share a name (e.g. `Notebook_1_Learning_from_Data.{ipynb,py}`).
+  must share a name (e.g. `Notebook_1a_Overview_and_Data_Representation.{ipynb,py}`).
 - `--execute` runs the notebook through the `python3` kernel and **stops on the first error**.
   Cells must therefore have all their dependencies installed in the venv first.
 
@@ -85,7 +85,7 @@ on GitHub/Colab. Re-render a notebook's outputs when you finalize it:
 
 ```bash
 scripts/execute_notebooks.sh                                   # all notebooks
-scripts/execute_notebooks.sh notebooks/Notebook_1/Notebook_1_Learning_from_Data.ipynb
+scripts/execute_notebooks.sh notebooks/Notebook_1/Notebook_1a_Overview_and_Data_Representation.ipynb
 ```
 
 This syncs, runs every cell, and writes the outputs back into the `.ipynb` (a `.py` path works
@@ -139,29 +139,25 @@ find notebooks -name '*.ipynb' -exec sh -c \
 git add -A   # then commit again
 ```
 
-## Publishing: Slides & Textbook
+## Publishing: Textbook
 
-The notebooks can be rendered two ways for the classroom, both driven by
+The notebooks are rendered into a textbook-style HTML site with
 [Quarto](https://quarto.org) (install the CLI once from quarto.org):
 
 | View | Script | Output | Use |
 | --- | --- | --- | --- |
-| **Slides** | `scripts/render_slides.sh` | `_slides/` | reveal.js deck for presenting in lecture |
 | **Textbook** | `scripts/render_book.sh` | `_book/` | scrollable site with sidebar nav + search, for student reference |
 
 ```bash
-scripts/render_slides.sh                       # slides for every notebook
-scripts/render_slides.sh notebooks/Notebook_1/Notebook_1_Learning_from_Data.ipynb   # one deck
 scripts/render_book.sh                         # the whole textbook
 
 # then view (works over an SSH tunnel: ssh -L 8080:localhost:8080 <host>):
-python3 -m http.server 8080 --directory _book      # or _slides
+python3 -m http.server 8080 --directory _book
 ```
 
-Both views use the **outputs already embedded in the `.ipynb`** (Quarto runs with
+The book uses the **outputs already embedded in the `.ipynb`** (Quarto runs with
 `eval: false`), so run `scripts/execute_notebooks.sh` first if any plots are stale.
-The `_slides/` and `_book/` directories are git-ignored — they are build artifacts,
-rebuilt on demand.
+The `_book/` directory is git-ignored — it is a build artifact, rebuilt on demand.
 
 ### Why the scripts (and not plain `quarto render`)
 
@@ -175,8 +171,6 @@ Quarto config and rendering there. Don't run `quarto render` directly in this re
 
 | File | Controls |
 | --- | --- |
-| `_quarto.yml` | slides: reveal.js theme, chalkboard, incremental bullets |
-| `custom.scss` | slide font sizes — edit `$presentation-font-size-root` (default `26px`) to scale everything |
 | `_quarto-book.yml` | textbook: theme, code visibility, section numbering (`number-depth`, `number-sections`) |
 | `book.css` | textbook: hides Quarto's redundant chapter-number prefix |
 | `index.qmd` | textbook landing page |

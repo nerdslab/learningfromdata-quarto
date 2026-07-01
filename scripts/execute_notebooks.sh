@@ -7,7 +7,7 @@
 #
 # Usage:
 #   scripts/execute_notebooks.sh                       # all notebooks
-#   scripts/execute_notebooks.sh notebooks/Notebook_1/Notebook_1_Learning_from_Data.ipynb
+#   scripts/execute_notebooks.sh notebooks/Notebook_1/Notebook_1a_Overview_and_Data_Representation.ipynb
 #   scripts/execute_notebooks.sh path/to/Notebook.py   # .py is accepted too
 #
 # Requires the runtime deps to be installed:  uv sync --extra dev  (plus the
