@@ -342,6 +342,7 @@ for _ in range(25):
     trajectory.append(beta.copy())
 
 trajectory = np.array(trajectory)
+trajectory_loss = np.array([loss(pt) for pt in trajectory])
 
 # Plot contours
 x = np.linspace(-4, 4, 200)
@@ -349,13 +350,32 @@ y = np.linspace(-4, 4, 200)
 X, Y = np.meshgrid(x, y)
 Z = X**2 + 0.5 * Y**2 + 1
 
-plt.figure(figsize=(6, 6))
-plt.contour(X, Y, Z, levels=20)
-plt.plot(trajectory[:, 0], trajectory[:, 1], marker="o", color="red")
-plt.title("Gradient Descent Path on 2D Loss Landscape")
-plt.xlabel("x")
-plt.ylabel("y")
-plt.gca().set_aspect("equal")
+fig = plt.figure(figsize=(13, 6))
+
+ax_2d = fig.add_subplot(1, 2, 1)
+ax_2d.contour(X, Y, Z, levels=20)
+ax_2d.plot(trajectory[:, 0], trajectory[:, 1], marker="o", color="red")
+ax_2d.set_title("Gradient Descent Path on 2D Loss Landscape")
+ax_2d.set_xlabel("x")
+ax_2d.set_ylabel("y")
+ax_2d.set_aspect("equal")
+
+ax_3d = fig.add_subplot(1, 2, 2, projection="3d")
+ax_3d.plot_surface(X, Y, Z, cmap="viridis", alpha=0.6, linewidth=0, antialiased=True)
+ax_3d.plot(
+    trajectory[:, 0],
+    trajectory[:, 1],
+    trajectory_loss,
+    marker="o",
+    color="red",
+    markersize=4,
+)
+ax_3d.set_title("Same Path on the 3D Loss Surface")
+ax_3d.set_xlabel("x")
+ax_3d.set_ylabel("y")
+ax_3d.set_zlabel("loss")
+
+plt.tight_layout()
 plt.show()
 
 
