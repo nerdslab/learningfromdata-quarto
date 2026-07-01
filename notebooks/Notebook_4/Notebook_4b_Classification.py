@@ -140,8 +140,8 @@
 # <ol>
 #     <li><b>True Positives (TP):</b> Data belonging to the class 1 that are predicted correctly as belonging to class 1.</li>
 #     <li><b>True Negatives (TN):</b> Data belonging to the class 0 that are predicted correctly as belonging to class 0.</li>
-#     <li><b>False Positives (FP):</b> Data belonging to the class 0 that are incorrectly predicted as belonging to class 1. These are also known as "Type 1" errors.</li>
-#     <li><b>False Negatives (FN):</b> Data belonging to the class 1 that are incorrectly predicted as belonging to class 0. These are also known as "Type 2" errors.</li>
+#     <li><b>False Positives (FP):</b> Data belonging to the class 0 that are incorrectly predicted as belonging to class 1. These are also known as "Type I" errors.</li>
+#     <li><b>False Negatives (FN):</b> Data belonging to the class 1 that are incorrectly predicted as belonging to class 0. These are also known as "Type II" errors.</li>
 # </ol>
 #
 # These four quantities can then be combined in different ways to give us measures that often shed light on different aspects of our classifier's performance.
@@ -188,20 +188,44 @@ ax.set_title("Confusion Matrix Anatomy")
 plt.colorbar(im, ax=ax, fraction=0.046)
 plt.show()
 
+# %% [markdown]
+# #### Callback: Type I/II errors, from hypothesis tests to classifiers
+#
+# **Statistics 1** introduced these two mistakes for a hypothesis test, and
+# **Statistics 2** showed how sample size and noise trade power ($1-\beta$) against
+# the chance of missing a real effect. A classifier making predictions is running the
+# same test, many times over — and FP/FN are literally Type I/II errors:
+#
+# | | $H_0$ is true (actually negative) | $H_0$ is false (actually positive) |
+# |---|---|---|
+# | **Reject $H_0$ (predict positive)** | ❌ Type I error = **False Positive** | ✅ correct |
+# | **Fail to reject $H_0$ (predict negative)** | ✅ correct | ❌ Type II error = **False Negative** |
+#
+# - **Recall** ($TP/(TP+FN)$) is the classifier's power: it falls as Type II errors
+#   (missed positives) pile up.
+# - **Precision** ($TP/(TP+FP)$) falls as Type I errors (false alarms) pile up.
+# - Moving the decision **threshold** trades one error type for the other — exactly
+#   like moving $\alpha$ trades Type I risk for Type II risk in a hypothesis test.
+#
+# There is no free lunch: which error costs more depends on the application, not the
+# math.
 
 # %% [markdown] id="ex-error-costs"
 # #### Exercise: Error Costs
 #
 # [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_4/Notebook_4b_Classification.ipynb#scrollTo=ex-error-costs)
 #
-# For each scenario, decide whether false positives or false negatives are more costly:
+# For each scenario, decide which is worse: a **Type I error** (false positive) or a
+# **Type II error** (false negative)?
 #
 # 1. A medical screening test.
 # 2. A spam filter.
 # 3. Fraud detection for credit cards.
 # 4. A quality-control system for defective products.
 #
-# How should the metric change depending on the application?
+# For each one: which error type dominates, and would you move the decision threshold
+# to trade precision for recall (or vice versa)? How should the metric you optimize
+# change depending on the application?
 #
 
 # %% [markdown] id="l0akB5UPzcZH"

@@ -172,8 +172,12 @@ ax.text(
 for x in [0.16, 0.50, 0.84]:
     ax.add_patch(
         FancyArrowPatch(
-            (0.5, 0.31), (x, 0.55), arrowstyle="->", mutation_scale=16,
-            linewidth=1.5, color="#222222"
+            (0.5, 0.31),
+            (x, 0.55),
+            arrowstyle="->",
+            mutation_scale=16,
+            linewidth=1.5,
+            color="#222222",
         )
     )
 
@@ -246,7 +250,6 @@ neighbor_idx = np.argsort(distances)[:k]
 
 # %%
 #| code-fold: true
-import matplotlib.pyplot as plt
 
 plt.figure(figsize=(6, 6))
 plt.scatter(

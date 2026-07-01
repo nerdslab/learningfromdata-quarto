@@ -61,8 +61,6 @@ import seaborn as sns
 #
 
 # %% colab={"base_uri": "https://localhost:8080/", "height": 391} executionInfo={"elapsed": 319, "status": "ok", "timestamp": 1766276534467, "user": {"displayName": "Eva Dyer", "userId": "13751912255938119410"}, "user_tz": 300} id="_f6r9HkZQg7j" outputId="577fb0c7-5fee-4e89-e2dd-208bfd84b4fc"
-import matplotlib.pyplot as plt
-import numpy as np
 
 np.random.seed(0)
 
@@ -71,6 +69,8 @@ true_signal = np.sin(2 * np.pi * x)
 noise = np.random.randn(len(x)) * 0.3
 observed = true_signal + noise
 
+# %%
+#| code-fold: true
 plt.figure(figsize=(6, 4))
 plt.plot(x, true_signal, label="True underlying pattern", color="red")
 plt.scatter(x, observed, label="Observed noisy data")
@@ -155,6 +155,8 @@ cov = np.array([[3.0, 2.2], [2.2, 2.0]])
 
 X_cloud = np.random.multivariate_normal(mean, cov, size=400)
 
+# %%
+#| code-fold: true
 plt.figure(figsize=(6, 6))
 plt.scatter(X_cloud[:, 0], X_cloud[:, 1], alpha=0.35)
 plt.axhline(0, color="gray", linewidth=1)
@@ -226,13 +228,14 @@ print(np.cov(X_cloud, rowvar=False))
 # %% colab={"base_uri": "https://localhost:8080/", "height": 472} executionInfo={"elapsed": 4932, "status": "ok", "timestamp": 1766276553396, "user": {"displayName": "Eva Dyer", "userId": "13751912255938119410"}, "user_tz": 300} id="MNTBHa3cnDaO" outputId="5e6e000f-0eb9-4c3a-baa8-ba81db8d2607"
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 
 rng = np.random.default_rng(0)
 
 # simulate repeated measurements of something (e.g., a biological measurement)
 measurements = rng.normal(loc=50, scale=8, size=500)
 
+# %%
+#| code-fold: true
 sns.histplot(measurements, bins=30, kde=True)
 plt.axvline(np.mean(measurements), color="red", label="Mean")
 plt.title("Repeated Measurements Show a Distribution, Not a Single Value")
@@ -267,6 +270,8 @@ x = np.linspace(20, 80, 500)
 pdf = norm.pdf(x, loc=50, scale=8)
 cdf = norm.cdf(x, loc=50, scale=8)
 
+# %%
+#| code-fold: true
 fig, ax = plt.subplots(1, 2, figsize=(12, 4))
 
 ax[0].plot(x, pdf)
@@ -311,6 +316,8 @@ normal_data = rng.normal(0, 1, 2000)
 uniform_data = rng.uniform(-3, 3, 2000)
 skewed_data = rng.gamma(shape=2, scale=1, size=2000)
 
+# %%
+#| code-fold: true
 fig, ax = plt.subplots(1, 3, figsize=(14, 4))
 
 sns.histplot(normal_data, kde=True, ax=ax[0], color="steelblue")
