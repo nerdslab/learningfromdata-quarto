@@ -830,55 +830,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_matrix_flow(
-    A, title="Matrix Flow Field", lim=2.6, grid_size=11, color="purple"
-):
-    """
-    Visualize a 2x2 matrix as a flow field.
-
-    Each arrow starts at a point x and points in the direction A x - x.
-    In other words, the arrow shows how the matrix moves that point.
-    """
-    grid_x, grid_y = np.meshgrid(
-        np.linspace(-2, 2, grid_size), np.linspace(-2, 2, grid_size)
-    )
-
-    points = np.stack([grid_x.flatten(), grid_y.flatten()], axis=1)
-    transformed = (A @ points.T).T
-    displacement = transformed - points
-
-    arrow_length = np.linalg.norm(displacement, axis=1)
-
-    plt.figure(figsize=(6, 6))
-    plt.quiver(
-        points[:, 0],
-        points[:, 1],
-        displacement[:, 0],
-        displacement[:, 1],
-        arrow_length,
-        angles="xy",
-        scale_units="xy",
-        scale=1,
-        cmap="plasma",
-        alpha=0.9,
-    )
-
-    plt.scatter(points[:, 0], points[:, 1], s=10, color="black", alpha=0.35)
-    plt.axhline(0, color="gray", linewidth=1)
-    plt.axvline(0, color="gray", linewidth=1)
-    plt.xlim(-lim, lim)
-    plt.ylim(-lim, lim)
-    plt.gca().set_aspect("equal", adjustable="box")
-    plt.colorbar(label="amount moved")
-    plt.title(title)
-    plt.xlabel("feature 1")
-    plt.ylabel("feature 2")
-    plt.show()
-
-    print("Matrix A:")
-    print(A)
-
-
 def plot_matrix_before_after(A, title="Before and After", lim=3, grid_size=11):
     """
     Show original grid points and their transformed locations.
@@ -926,12 +877,20 @@ def plot_matrix_before_after(A, title="Before and After", lim=3, grid_size=11):
 
 
 def plot_matrix_flow_and_morph_gif(
-    A, title="Matrix Transformation", grid_size=9, lim=3, n_frames=24, seconds=2.5
+    A,
+    title="Matrix Transformation",
+    grid_size=9,
+    lim=3,
+    n_frames=24,
+    seconds=2.5,
+    hold_seconds=1.0,
 ):
     """
     Left panel: the static flow field for A (for reference).
     Right panel: an animated GIF of the grid morphing continuously from the
-    identity (t=0) to the fully applied matrix A (t=1).
+    identity (t=0) to the fully applied matrix A (t=1). The first and last
+    frames (t=0 and t=1) linger for `hold_seconds` so the viewer has time to
+    register the "before" and "after" states.
     """
     import io
 
@@ -984,13 +943,19 @@ def plot_matrix_flow_and_morph_gif(
         buf.seek(0)
         frames.append(Image.open(buf).convert("RGB"))
 
+    frame_duration = int(1000 * seconds / n_frames)
+    hold_duration = int(1000 * hold_seconds)
+    durations = [frame_duration] * n_frames
+    durations[0] = hold_duration
+    durations[-1] = hold_duration
+
     gif_buf = io.BytesIO()
     frames[0].save(
         gif_buf,
         format="GIF",
         save_all=True,
         append_images=frames[1:],
-        duration=int(1000 * seconds / n_frames),
+        duration=durations,
         loop=0,
     )
     gif_buf.seek(0)
@@ -1024,7 +989,7 @@ def plot_matrix_flow_and_morph_gif(
 # %%
 I = np.array([[1, 0], [0, 1]])
 
-plot_matrix_flow(I, title="Identity Matrix: No Flow Because Nothing Moves")
+plot_matrix_flow_and_morph_gif(I, title="Identity Matrix: No Flow Because Nothing Moves")
 
 # %% [markdown]
 # ### Example 2: Stretching Space
@@ -1044,18 +1009,6 @@ plot_matrix_flow(I, title="Identity Matrix: No Flow Because Nothing Moves")
 # %%
 A_stretch = np.array([[1.8, 0], [0, 0.6]])
 
-plot_matrix_flow(
-    A_stretch, title="Stretch/Shrink Matrix: Flow Away from and Toward Axes"
-)
-
-# %% [markdown]
-# The flow field above shows the *direction* each point moves, all at once. The
-# animation below shows the same transformation unfold over time: the grid on the
-# right morphs continuously from the identity ($t=0$) to the fully applied matrix
-# $A$ ($t=1$), while the flow field on the left stays put for reference.
-
-# %%
-#| code-fold: true
 plot_matrix_flow_and_morph_gif(
     A_stretch, title="Stretch/Shrink Matrix: Grid Morphing from I to A"
 )
@@ -1080,7 +1033,9 @@ theta = np.radians(35)
 
 A_rotate = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
 
-plot_matrix_flow(A_rotate, title="Rotation Matrix: Circular Flow Around the Origin")
+plot_matrix_flow_and_morph_gif(
+    A_rotate, title="Rotation Matrix: Circular Flow Around the Origin"
+)
 
 # %% [markdown]
 # ### Example 4: Mixing Features with a Shear
@@ -1100,7 +1055,9 @@ plot_matrix_flow(A_rotate, title="Rotation Matrix: Circular Flow Around the Orig
 # %%
 A_shear = np.array([[1, 0.8], [0, 1]])
 
-plot_matrix_flow(A_shear, title="Shear Matrix: Flow Depends on the Other Feature")
+plot_matrix_flow_and_morph_gif(
+    A_shear, title="Shear Matrix: Flow Depends on the Other Feature"
+)
 
 # %% [markdown]
 # ### Example 5: A General Transformation
@@ -1112,7 +1069,7 @@ plot_matrix_flow(A_shear, title="Shear Matrix: Flow Depends on the Other Feature
 # %%
 A = np.array([[1.2, 0.6], [-0.3, 1.1]])
 
-plot_matrix_flow(A, title="General Matrix: Stretching, Rotating, and Mixing")
+plot_matrix_flow_and_morph_gif(A, title="General Matrix: Stretching, Rotating, and Mixing")
 
 # Optional: show where the same points land after the transformation.
 plot_matrix_before_after(A, title="Before and After the General Matrix Transformation")
@@ -1141,7 +1098,7 @@ plot_matrix_before_after(A, title="Before and After the General Matrix Transform
 # Exercise: edit this matrix and rerun the cell.
 A_exercise = np.array([[1.0, 0.0], [0.0, 1.0]])
 
-plot_matrix_flow(A_exercise, title="My Matrix Flow Field")
+plot_matrix_flow_and_morph_gif(A_exercise, title="My Matrix Flow Field")
 
 # %% [markdown] id="9c9zSnYMxbve"
 # ### Dot Product: Weighted Sums of Features
