@@ -26,8 +26,8 @@
 #
 # This notebook covers:
 #
-# 1. Probability and random variables
-# 2. Expectation and variance
+# 1. Probability, conditional probability, and random variables
+# 2. The cumulative distribution function (CDF), expectation, and variance
 # 3. Common distributions and the *generating processes* that produce them
 # 4. The Law of Large Numbers and the Central Limit Theorem
 #
@@ -103,6 +103,48 @@ def show_widget_or_fallback(widget_fn, fallback_fn):
 #
 
 # %% [markdown]
+# ### Conditional probability
+#
+# Often we want to update a probability once we learn that some event has already
+# happened. The **conditional probability** of $A$ given $B$ is
+#
+# $$
+# P(A \mid B) = \frac{P(A \cap B)}{P(B)}, \qquad P(B) > 0.
+# $$
+#
+# In words: restrict attention to the world where $B$ happened, and ask what
+# fraction of that smaller world is also $A$.
+#
+# Two events are **independent** exactly when conditioning on one tells you
+# nothing about the other:
+#
+# $$
+# P(A \mid B) = P(A) \quad \Longleftrightarrow \quad P(A \cap B) = P(A)\,P(B).
+# $$
+#
+# **Example.** Roll a fair six-sided die. Let $A$ = "the roll is even" and $B$ =
+# "the roll is greater than 3" (i.e. $B = \{4, 5, 6\}$). Then $A \cap B = \{4, 6\}$, so
+#
+# $$
+# P(A \mid B) = \frac{P(\{4, 6\})}{P(\{4, 5, 6\})} = \frac{2/6}{3/6} = \frac{2}{3}.
+# $$
+#
+# Knowing the roll is greater than 3 raised the chance of "even" from $1/2$ to $2/3$
+# — the two events are *not* independent.
+#
+
+# %%
+#| code-fold: true
+rolls = np.random.default_rng(0).integers(1, 7, size=200_000)
+
+A = rolls % 2 == 0
+B = rolls > 3
+
+p_A_given_B = (A & B).sum() / B.sum()
+print(f"Simulated P(A | B) = {p_A_given_B:.3f}")
+print("Formula:            P(A | B) = (2/6) / (3/6) =", round((2 / 6) / (3 / 6), 3))
+
+# %% [markdown]
 #
 # ### Random variables
 #
@@ -111,7 +153,6 @@ def show_widget_or_fallback(widget_fn, fallback_fn):
 # $$
 # X: \Omega \rightarrow \mathbb{N} \;\text{(discrete)} \quad\text{or}\quad X: \Omega \rightarrow \mathbb{R} \;\text{(continuous)}
 # $$
-# more details
 #
 # Examples:
 #
@@ -159,6 +200,48 @@ plt.show()
 
 print("Probabilities:", np.round(pmf, 3))
 print("Sum of probabilities:", pmf.sum())  # must equal 1
+
+
+# %% [markdown]
+# ### The cumulative distribution function (CDF)
+#
+# The PMF/PDF answers "how likely is this exact value?" A second, equally useful
+# description answers a different question: "how likely is a value *at or below*
+# $x$?" That is the **cumulative distribution function**:
+#
+# $$
+# F_X(x) = P(X \le x).
+# $$
+#
+# The CDF is defined the same way for discrete and continuous random variables, and
+# always satisfies:
+#
+# - $F_X$ is non-decreasing,
+# - $F_X(x) \to 0$ as $x \to -\infty$ and $F_X(x) \to 1$ as $x \to \infty$,
+# - for a discrete variable, $F_X$ is a **step function** — it jumps by $P(X=k)$ at
+#   each possible value $k$, and is built from the PMF by cumulative summation:
+#   $F_X(x) = \sum_{k \le x} P(X=k)$.
+#
+# For a continuous variable, $F_X$ is the running integral of the PDF,
+# $F_X(x) = \int_{-\infty}^x f_X(t)\, dt$, so it is smooth rather than a staircase.
+#
+
+# %%
+#| code-fold: true
+cdf = np.cumsum(pmf)
+
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.step(faces, cdf, where="post", color="#4C72B0", linewidth=2)
+ax.scatter(faces, cdf, color="#4C72B0", zorder=5)
+ax.set_xticks(faces)
+ax.set_ylim(0, 1.05)
+ax.set_xlabel("$x$")
+ax.set_ylabel("$F_X(x) = P(X \\leq x)$")
+ax.set_title("CDF of a Fair Six-Sided Die (cumulative sum of the PMF)")
+ax.grid(True, axis="y", color="0.92")
+plt.show()
+
+print("CDF values F(1..6):", np.round(cdf, 3))
 
 
 # %% [markdown]

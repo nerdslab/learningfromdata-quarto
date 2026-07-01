@@ -622,19 +622,6 @@ print(pow_two)
 # Let’s visualize.
 #
 
-# %% colab={"base_uri": "https://localhost:8080/"} executionInfo={"elapsed": 4, "status": "ok", "timestamp": 1766276547810, "user": {"displayName": "Eva Dyer", "userId": "13751912255938119410"}, "user_tz": 300} id="DlduroaEvoLp" outputId="ab927fd4-6596-4077-f481-14601da03206"
-## Simple example, computing L2 distance
-
-a = np.array([1, 2, 0, 4, 10, 8])
-b = np.array([2, 1, 2, 7, 8, 9])
-x = b - a
-
-L2 = np.sqrt(np.sum((x) ** 2))
-L1 = np.sum(np.abs(x))
-
-print(f"L2={L2}, L1={L1}")
-
-
 # %% colab={"base_uri": "https://localhost:8080/", "height": 638} executionInfo={"elapsed": 371, "status": "ok", "timestamp": 1766276548179, "user": {"displayName": "Eva Dyer", "userId": "13751912255938119410"}, "user_tz": 300} id="MLfpv8bmu0RF" outputId="012eef62-4041-4485-af06-f1b4de3307da"
 import matplotlib.pyplot as plt
 import numpy as np
@@ -938,6 +925,87 @@ def plot_matrix_before_after(A, title="Before and After", lim=3, grid_size=11):
     plt.show()
 
 
+def plot_matrix_flow_and_morph_gif(
+    A, title="Matrix Transformation", grid_size=9, lim=3, n_frames=24, seconds=2.5
+):
+    """
+    Left panel: the static flow field for A (for reference).
+    Right panel: an animated GIF of the grid morphing continuously from the
+    identity (t=0) to the fully applied matrix A (t=1).
+    """
+    import io
+
+    from PIL import Image
+
+    grid_x, grid_y = np.meshgrid(
+        np.linspace(-2, 2, grid_size), np.linspace(-2, 2, grid_size)
+    )
+    points = np.stack([grid_x.flatten(), grid_y.flatten()], axis=1)
+
+    displacement = (A @ points.T).T - points
+    arrow_length = np.linalg.norm(displacement, axis=1)
+
+    frames = []
+    for t in np.linspace(0, 1, n_frames):
+        A_t = (1 - t) * np.eye(2) + t * A
+        transformed = (A_t @ points.T).T
+
+        fig, (ax_flow, ax_grid) = plt.subplots(1, 2, figsize=(11, 5.5))
+
+        ax_flow.quiver(
+            points[:, 0],
+            points[:, 1],
+            displacement[:, 0],
+            displacement[:, 1],
+            arrow_length,
+            angles="xy",
+            scale_units="xy",
+            scale=1,
+            cmap="plasma",
+            alpha=0.9,
+        )
+        ax_flow.scatter(points[:, 0], points[:, 1], s=10, color="black", alpha=0.35)
+        ax_flow.set_title("Flow Field ($Ax - x$)")
+
+        ax_grid.scatter(transformed[:, 0], transformed[:, 1], s=24, color="teal")
+        ax_grid.set_title(f"Grid at $t={t:.2f}$")
+
+        for ax in (ax_flow, ax_grid):
+            ax.axhline(0, color="gray", linewidth=1)
+            ax.axvline(0, color="gray", linewidth=1)
+            ax.set_xlim(-lim, lim)
+            ax.set_ylim(-lim, lim)
+            ax.set_aspect("equal", adjustable="box")
+
+        fig.suptitle(title)
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=80)
+        plt.close(fig)
+        buf.seek(0)
+        frames.append(Image.open(buf).convert("RGB"))
+
+    gif_buf = io.BytesIO()
+    frames[0].save(
+        gif_buf,
+        format="GIF",
+        save_all=True,
+        append_images=frames[1:],
+        duration=int(1000 * seconds / n_frames),
+        loop=0,
+    )
+    gif_buf.seek(0)
+
+    # Quarto's HTML renderer does not pick up embedded image/gif outputs, so we
+    # emit an <img> tag with the GIF inlined as a base64 data URI instead (a
+    # text/html output, which it does render).
+    import base64
+
+    from IPython.display import HTML, display
+
+    gif_b64 = base64.b64encode(gif_buf.getvalue()).decode("ascii")
+    display(HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="{title}">'))
+
+
 # %% [markdown]
 # ### Example 1: The Identity Matrix
 #
@@ -978,6 +1046,18 @@ A_stretch = np.array([[1.8, 0], [0, 0.6]])
 
 plot_matrix_flow(
     A_stretch, title="Stretch/Shrink Matrix: Flow Away from and Toward Axes"
+)
+
+# %% [markdown]
+# The flow field above shows the *direction* each point moves, all at once. The
+# animation below shows the same transformation unfold over time: the grid on the
+# right morphs continuously from the identity ($t=0$) to the fully applied matrix
+# $A$ ($t=1$), while the flow field on the left stays put for reference.
+
+# %%
+#| code-fold: true
+plot_matrix_flow_and_morph_gif(
+    A_stretch, title="Stretch/Shrink Matrix: Grid Morphing from I to A"
 )
 
 # %% [markdown]
@@ -1106,16 +1186,10 @@ print("a·c =", np.dot(a, c))
 # ### Quick Questions
 #
 # 1. What does multiplying A x do conceptually?
-# - combine features?
-# - stretch space?
-# - just magic?
 #
-# 2. What might go wrong if A is badly chosen?
+# 2. What could go wrong if $A$ is a poor choice, in terms of the information the transformation preserves or destroys?
 #
 # 3. Where might you already have seen matrices?
-# - image filters?
-# - rotations in graphics?
-# - spreadsheet tables?
 #
 
 # %% [markdown] id="SG5PDPYQ147A"
