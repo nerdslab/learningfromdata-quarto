@@ -285,6 +285,9 @@ plt.show()
 # %% [markdown]
 # ## A Zoo of Distributions
 #
+# You met a few distributions informally back in Module 1 (*Noise & Modeling Data*),
+# where we used them to picture variability. Here we make them precise.
+#
 # A distribution is best understood not as a formula to memorize but as the
 # fingerprint of a **generating process** — a story about how the numbers come to
 # be. We have already met two:

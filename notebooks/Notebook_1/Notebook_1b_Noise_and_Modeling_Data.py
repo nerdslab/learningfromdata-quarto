@@ -124,7 +124,7 @@ plt.show()
 # - **covariance**, which describes how features vary together and gives a data cloud its shape, and
 # - **probability distributions**, which model the range of values a measurement can take.
 #
-# (These build on the vectors, matrices, and eigenvector ideas from the previous notebook.)
+# (These build on the vectors and matrices from the previous notebook.)
 
 # %% [markdown]
 # ## Covariance: The Shape of Data
@@ -170,75 +170,20 @@ print(np.cov(X_cloud, rowvar=False))
 
 
 # %% [markdown]
-# ### Eigenvectors of the Covariance Matrix
+# ### Where this goes next
 #
-# The covariance matrix describes the direction and amount of variation in the data.
+# The covariance matrix does more than tell us *whether* two features move together —
+# it also encodes the **directions** in which the data cloud is stretched. Finding
+# those directions of greatest variation is the geometric heart of **principal
+# components analysis (PCA)**, which we develop in **Module 5 (Representation
+# Learning)**. For now, the takeaway is just that covariance gives a data cloud its
+# shape.
 #
-# Its **eigenvectors** point in special directions:
+# **Quick discussion.**
 #
-# - the first eigenvector points along the direction of greatest variation,
-# - the second eigenvector points along the next direction of variation,
-# - the eigenvalues tell us how much variation lies along each direction.
-#
-# This is the geometric foundation of principal components analysis, or PCA.
-#
-
-# %%
-# Compute eigenvalues and eigenvectors of the covariance matrix
-sample_cov = np.cov(X_cloud, rowvar=False)
-eigenvalues, eigenvectors = np.linalg.eigh(sample_cov)
-
-# Sort from largest to smallest eigenvalue
-order = np.argsort(eigenvalues)[::-1]
-eigenvalues = eigenvalues[order]
-eigenvectors = eigenvectors[:, order]
-
-center = X_cloud.mean(axis=0)
-
-plt.figure(figsize=(6, 6))
-plt.scatter(X_cloud[:, 0], X_cloud[:, 1], alpha=0.25)
-
-colors = ["crimson", "darkorange"]
-for i in range(2):
-    direction = eigenvectors[:, i]
-    length = np.sqrt(eigenvalues[i])
-    vector = direction * length
-    plt.arrow(
-        center[0],
-        center[1],
-        vector[0],
-        vector[1],
-        color=colors[i],
-        width=0.03,
-        head_width=0.18,
-        length_includes_head=True,
-        label=f"eigenvector {i + 1}",
-    )
-
-plt.axhline(0, color="gray", linewidth=1)
-plt.axvline(0, color="gray", linewidth=1)
-plt.axis("equal")
-plt.legend()
-plt.title("Eigenvectors Point Along the Main Directions of Variation")
-plt.xlabel("feature 1")
-plt.ylabel("feature 2")
-plt.show()
-
-print("Eigenvalues:", eigenvalues)
-print("Eigenvectors:")
-print(eigenvectors)
-
-
-# %% [markdown]
-# ### Quick Discussion
-#
-# 1. Which direction has the most variation?
-# 2. How can you tell from the plot?
-# 3. What does the largest eigenvalue mean?
-# 4. What would the eigenvalues look like for a round data cloud?
-# 5. Why might projecting data onto the largest-variance direction be useful?
-#
-# We will return to this idea later when we study PCA and representation learning.
+# 1. Looking at the scatter plot, in which direction is the cloud most spread out?
+# 2. What would the cloud look like if the two features had (near) zero covariance?
+# 3. Why might the "direction of greatest variation" be a useful summary of the data?
 #
 
 # %% [markdown] id="J2S5cl7Tlbis"
@@ -272,7 +217,9 @@ print(eigenvectors)
 # - reason about uncertainty in predictions
 # - decide whether two groups differ meaningfully
 #
-# Here we build intuition first.
+# In particular, **Module 3 (Probability)** treats these distributions rigorously —
+# each one defined by the *process that generates it*, along with its expectation and
+# variance. Here we build intuition first.
 #
 #
 
