@@ -360,8 +360,8 @@ print(matrix)
 
 # %% [markdown] id="CEBm7bbXS2cP"
 # ### More Resources:
-# - https://docs.python.org/3/tutorial/introduction.html
-# - https://docs.python.org/3/tutorial/
+# - [Python tutorial: An Informal Introduction to Python](https://docs.python.org/3/tutorial/introduction.html)
+# - [Python tutorial](https://docs.python.org/3/tutorial/)
 
 # %% [markdown] id="LbtzesVlv9u-"
 # ## Linear Algebra and NumPy
@@ -699,7 +699,7 @@ plt.show()
 
 # %% [markdown] id="rVMDTZJutCt9"
 # ### More resources
-# - https://numpy.org/doc/stable/user/absolute_beginners.html
+# - [NumPy: The Absolute Basics for Beginners](https://numpy.org/doc/stable/user/absolute_beginners.html)
 
 # %% [markdown] id="QGvN-41qwb6v"
 # ## Matrix-Vector Operations
@@ -830,52 +830,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_matrix_before_after(A, title="Before and After", lim=3, grid_size=11):
-    """
-    Show original grid points and their transformed locations.
-    This complements the flow field by showing where the points land.
-    """
-    grid_x, grid_y = np.meshgrid(
-        np.linspace(-2, 2, grid_size), np.linspace(-2, 2, grid_size)
-    )
-
-    points = np.stack([grid_x.flatten(), grid_y.flatten()], axis=1)
-    transformed = (A @ points.T).T
-
-    plt.figure(figsize=(6, 6))
-    plt.scatter(
-        points[:, 0], points[:, 1], s=16, color="black", alpha=0.35, label="original"
-    )
-    plt.scatter(
-        transformed[:, 0],
-        transformed[:, 1],
-        s=18,
-        color="teal",
-        alpha=0.75,
-        label="transformed",
-    )
-
-    for start, end in zip(points, transformed):
-        plt.plot(
-            [start[0], end[0]],
-            [start[1], end[1]],
-            color="purple",
-            alpha=0.15,
-            linewidth=0.8,
-        )
-
-    plt.axhline(0, color="gray", linewidth=1)
-    plt.axvline(0, color="gray", linewidth=1)
-    plt.xlim(-lim, lim)
-    plt.ylim(-lim, lim)
-    plt.gca().set_aspect("equal", adjustable="box")
-    plt.legend(loc="upper left")
-    plt.title(title)
-    plt.xlabel("feature 1")
-    plt.ylabel("feature 2")
-    plt.show()
-
-
 def plot_matrix_flow_and_morph_gif(
     A,
     title="Matrix Transformation",
@@ -989,7 +943,9 @@ def plot_matrix_flow_and_morph_gif(
 # %%
 I = np.array([[1, 0], [0, 1]])
 
-plot_matrix_flow_and_morph_gif(I, title="Identity Matrix: No Flow Because Nothing Moves")
+plot_matrix_flow_and_morph_gif(
+    I, title="Identity Matrix: No Flow Because Nothing Moves"
+)
 
 # %% [markdown]
 # ### Example 2: Stretching Space
@@ -1069,7 +1025,9 @@ plot_matrix_flow_and_morph_gif(
 # %%
 A = np.array([[1.2, 0.6], [-0.3, 1.1]])
 
-plot_matrix_flow_and_morph_gif(A, title="General Matrix: Stretching, Rotating, and Mixing")
+plot_matrix_flow_and_morph_gif(
+    A, title="General Matrix: Stretching, Rotating, and Mixing"
+)
 
 # Optional: show where the same points land after the transformation.
 plot_matrix_before_after(A, title="Before and After the General Matrix Transformation")
@@ -1410,9 +1368,9 @@ df.head(10)
 # %% [markdown] id="0umwS5_Loamr"
 # **More resources**
 #
-# - matplotlib cheatsheets: https://github.com/matplotlib/cheatsheets#cheatsheets
-# - matplotlib gallery: https://matplotlib.org/stable/gallery/index.html
-# - seaborn gallery: https://seaborn.pydata.org/examples/index.html
+# - [matplotlib cheatsheets](https://github.com/matplotlib/cheatsheets#cheatsheets)
+# - [matplotlib gallery](https://matplotlib.org/stable/gallery/index.html)
+# - [seaborn gallery](https://seaborn.pydata.org/examples/index.html)
 
 # %% [markdown] id="bRFEetBD2ezm"
 # ### Pandas for Table Manipulation
@@ -1488,7 +1446,7 @@ print(df.head())
 
 # %% [markdown] id="V_MB2smWtL86"
 # ### More resources
-# - pandas cheatsheet: https://pandas.pydata.org/Pandas_Cheat_Sheet.pdf
+# - [pandas cheatsheet](https://pandas.pydata.org/Pandas_Cheat_Sheet.pdf)
 
 # %% [markdown] id="x-27VROmIJg0"
 # *Contributors*: Mehdi Azabou, Eva Dyer
