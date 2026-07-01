@@ -14,7 +14,8 @@ book:
     - index.qmd
     - part: "Module 1: Learning from Data"
       chapters:
-        - notebooks/Notebook_1/Notebook_1_Learning_from_Data.ipynb
+        - notebooks/Notebook_1/Notebook_1a_Overview_and_Data_Representation.ipynb
+        - notebooks/Notebook_1/Notebook_1b_Noise_and_Modeling_Data.ipynb
     - part: "Module 2: Building & Selecting Models"
       chapters:
         - notebooks/Notebook_2/Notebook_2a_Building_a_Model.ipynb

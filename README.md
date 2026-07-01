@@ -22,7 +22,8 @@ examples/    Supplemental Colab notebooks and narrative guides
 
 | Notebook | Topic |
 | --- | --- |
-| `Notebook_1/Notebook_1_Learning_from_Data.ipynb` | Learning from Data |
+| `Notebook_1/Notebook_1a_Overview_and_Data_Representation.ipynb` | Overview & Data Representation (Lecture 2) |
+| `Notebook_1/Notebook_1b_Noise_and_Modeling_Data.ipynb` | Noise, Variability & Modeling Data (Lecture 3) |
 | `Notebook_2/Notebook_2a_Building_a_Model.ipynb` | Model Building |
 | `Notebook_2/Notebook_2b_Model_Selection.ipynb` | Model Selection |
 | `Notebook_3/Notebook_3a_Probability_and_Covariance.ipynb` | Probability, Random Variables, and Covariance (Lecture 8) |

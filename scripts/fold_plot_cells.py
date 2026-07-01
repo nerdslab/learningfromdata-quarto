@@ -75,7 +75,7 @@ def main():
     inc_nb1 = '--include-nb1' in sys.argv
     total = 0
     for path in sorted(glob.glob(os.path.join(ROOT, 'notebooks/**/*.py'), recursive=True)):
-        if not inc_nb1 and 'Notebook_1_Learning' in path:
+        if not inc_nb1 and os.path.basename(path).startswith('Notebook_1'):
             continue
         hits = process(path, apply)
         if hits:
