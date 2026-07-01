@@ -1,12 +1,32 @@
-/* The chapter titles already start with "Module N. ...", so Quarto's automatic
-   chapter-number prefix (the bare "1") is redundant. Hide it in both the page
-   title and the sidebar. Section numbers (.header-section-number, e.g. 1.2.8)
-   are left intact. */
+/* Quarto auto-numbers each book chapter, so the page title renders as
+     <span class="chapter-number">1</span>&nbsp; <span class="chapter-title">…</span>
+   The bare "1" is redundant with our Part/Module grouping, so we hide it — but
+   hiding the number span alone leaves the "&nbsp; " text node that followed it
+   as leading whitespace before the title. We collapse that whitespace by
+   zeroing the h1's font size and restoring the visible title span.
+
+   Scope notes:
+   - .chapter-number is hidden globally (page title AND sidebar).
+   - The font-size:0 collapse is scoped with :has(.chapter-number) so it only
+     touches chapter titles — the landing page's <h1 class="title"> holds raw
+     text (no .chapter-title span) and must not be zeroed.
+   - The restore is scoped to `h1.title .chapter-title`, so sidebar chapter
+     links (which use .chapter-title outside any h1.title) are untouched.
+   - Section numbers (.header-section-number, e.g. 1.2.8) are left intact. */
 .chapter-number {
   display: none;
 }
 
-/* Drop the now-dangling non-breaking space that followed the chapter number. */
+h1.title:has(.chapter-number) {
+  font-size: 0; /* collapses the dangling "&nbsp; " left by the hidden number */
+}
+
+/* Restore Bootstrap/cosmo's responsive h1 size on the visible title text. */
 h1.title .chapter-title {
-  margin-left: 0;
+  font-size: calc(1.325rem + 0.9vw);
+}
+@media (min-width: 1200px) {
+  h1.title .chapter-title {
+    font-size: 2rem;
+  }
 }
