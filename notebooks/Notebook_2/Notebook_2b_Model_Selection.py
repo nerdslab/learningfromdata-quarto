@@ -239,8 +239,7 @@ plot_grid_search_over_time_gif(candidates, values)
 # instead of trying everything,
 # we **follow the slope of the loss function**.
 #
-# This leads to…
-# 👉 Gradient Descent
+# This leads to **Gradient Descent**.
 #
 
 # %% [markdown] id="vs3Yvhn04l6R"
@@ -1307,7 +1306,7 @@ plt.show()
 #
 
 # %% [markdown] id="fz4kIYpnASx4"
-# ### ✏️ Additional Questions
+# ### Additional Questions
 
 # %% [markdown] id="mPeGKp8BXdm7"
 # **Challenge 1.**
@@ -1323,16 +1322,16 @@ plt.show()
 # %% [markdown] id="79-Rqt9v9wfA"
 # **Challenge 2.**
 #
-# 1️⃣ Why is a model that perfectly fits training data *not always good*?
+# 1. Why is a model that perfectly fits training data *not always good*?
 #
-# 2️⃣ Where do you see “overfitting” in real life?
+# 2. Where do you see “overfitting” in real life?
 # Examples:
 #
 # - memorizing exam answers vs understanding
 # - overtraining in sports
 # - overly tuned rules or policies
 #
-# 3️⃣ Why can’t we judge a model using only training error?
+# 3. Why can’t we judge a model using only training error?
 #
 
 # %% [markdown] id="VP9xE6MYAxeS"

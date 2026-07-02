@@ -132,7 +132,7 @@ plt.show()
 #
 
 # %% [markdown] id="BkyNqg2DOL6w"
-# 💥 **Challenge:**
+# **Challenge:**
 #
 # Write out an expression for the output of the MLP in the figure above. Make clear the dimension of all weight matrices, and assume that a general activation function $\sigma()$ is used at each hidden layer.
 #
@@ -181,7 +181,7 @@ print("Train accuracy:", clf.score(train_imgs, train_labels))
 print("Test accuracy:", clf.score(test_imgs, test_labels))
 
 # %% [markdown] id="3IU2V2kvVHst"
-# 💥 **Challenge:**
+# **Challenge:**
 # Try some different hyperparameters and test different architectures. Report the accuracies on the train and test sets for at least three different MLP models.
 #
 
@@ -919,7 +919,7 @@ print("Validation acc (Early stopping): %.2f" % history["valid_acc"][early_stop_
 print("Test acc (Early stopping): %.2f" % history["test_acc"][early_stop_epoch])
 
 # %% [markdown] id="NQaJa_mLVlq0"
-# 💥 **Challenge:**
+# **Challenge:**
 # Incorporate different types of augmentations into your model, discuss how different augmentations impact the accuracy on the test data.
 #
 # >

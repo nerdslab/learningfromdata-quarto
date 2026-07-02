@@ -629,7 +629,7 @@ plt.show()
 # Where $x_i$ are the inputs or features for every $i^{th}$ data point, and $y_i$ are the corresponding outputs or labels. In general, we can simplify this problem and say that $p=0.5$ and threshold our predictions accordingly.
 
 # %% [markdown] id="OJmb91Qkhdke"
-# 💥 **Challenge:**
+# **Challenge:**
 #
 # > (1) Which $g$'s are "good" functions to use for our purposes? What properties do we desire for a "good" $g$? What might complicate our problem when trying to solve for $\beta$?
 #
@@ -927,7 +927,7 @@ g = sns.pairplot(data_first10, diag_kind="kde")
 
 
 # %% [markdown] id="c9sATlc2AOr5"
-# 💥 **Challenge:**
+# **Challenge:**
 #
 # Discuss what you can observe from the pairplot for this dataset? Which features appear salient for classification?
 
@@ -1307,7 +1307,7 @@ ax.legend()
 fig.tight_layout()
 
 # %% [markdown] id="i63GQeRFI898"
-# 💥 **Challenge:**
+# **Challenge:**
 #
 # What's happening in the example above? What are two ways that you could try to correct the issue?
 
@@ -1375,7 +1375,7 @@ plt.colorbar()
 # add your code here
 
 # %% [markdown] id="OzSgkBDI0AtG"
-# 💥 **Challenge:**
+# **Challenge:**
 #
 # 1. Create a set of synthetic experiments to explore how (at least three) different rebalancing approaches work for: (i) different levels of imbalance, (ii) different amounts of noise, and (iii) across different types of data (linear vs nonlinearly separable etc).
 #
@@ -1455,7 +1455,7 @@ plt.show()
 
 
 # %% [markdown] id="mnX4ZPTP3RYW"
-# 💥 **Discussion:**
+# **Discussion:**
 #
 # > Add your discussion here.
 

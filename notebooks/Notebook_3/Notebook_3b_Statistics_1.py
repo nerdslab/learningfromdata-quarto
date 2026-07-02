@@ -283,7 +283,7 @@ plt.show()
 #
 # **Back to the penguins.** Suppose our data give a 95% confidence interval of $[750\text{ g},\ 1050\text{ g}]$ for the difference in mean body mass between Gentoo and Adelie penguins. This says that the values between 750 g and 1050 g are all plausible estimates of the true difference.
 #
-# > 💡 **CIs and p-values are two views of the same evidence.** A 95% confidence interval that excludes the null value corresponds to a p-value below $\alpha = 0.05$ (indeed, $95\%=0.95=1-0.05=1-\alpha)$). The confidence interval is often more informative, though, because it shows not just *whether* there is a difference but also *how big* it plausibly is.
+# > **CIs and p-values are two views of the same evidence.** A 95% confidence interval that excludes the null value corresponds to a p-value below $\alpha = 0.05$ (indeed, $95\%=0.95=1-0.05=1-\alpha)$). The confidence interval is often more informative, though, because it shows not just *whether* there is a difference but also *how big* it plausibly is.
 #
 
 # %% [markdown] id="wMvSvNq6Pxpm"

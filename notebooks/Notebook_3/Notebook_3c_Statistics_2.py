@@ -465,7 +465,7 @@ show_widget_or_fallback(
 #
 
 # %% [markdown] id="ex-diabetes-dataset-inference"
-# ## 🧪 Diabetes Dataset Inference Exercises
+# ## Diabetes Dataset Inference Exercises
 #
 # [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nerdslab/learningfromdata-course/blob/main/notebooks/Notebook_3/Notebook_3c_Statistics_2.ipynb#scrollTo=ex-diabetes-dataset-inference)
 #
@@ -473,7 +473,7 @@ show_widget_or_fallback(
 #
 # ---
 #
-# ### 🔎 Exercise 1 — Two-Group Comparison (Welch t-test)
+# ### Exercise 1 — Two-Group Comparison (Welch t-test)
 #
 # We split patients into:
 #
@@ -494,7 +494,7 @@ show_widget_or_fallback(
 #
 # ---
 #
-# ### 📊 Exercise 2 — ANOVA Across BMI Quartiles
+# ### Exercise 2 — ANOVA Across BMI Quartiles
 #
 # We compared 4 BMI groups using ANOVA.
 #
@@ -509,7 +509,7 @@ show_widget_or_fallback(
 #
 # ---
 #
-# ### 🎲 Exercise 3 — Permutation Testing
+# ### Exercise 3 — Permutation Testing
 #
 # Compare:
 #
@@ -524,7 +524,7 @@ show_widget_or_fallback(
 #
 # ---
 #
-# ### 🧠 Final Reflection
+# ### Final Reflection
 #
 # Write a short paragraph:
 #
