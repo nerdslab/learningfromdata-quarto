@@ -287,6 +287,87 @@ for a in ax:
 plt.suptitle("PDF vs CDF — Two Views of the Same Distribution")
 plt.show()
 
+# %% [markdown]
+# The CDF is literally the *running total* of the area under the PDF. The
+# animation below sweeps a value $x_0$ from left to right: the shaded area under
+# the PDF up to $x_0$ (left) is exactly the height of the CDF curve at $x_0$
+# (right).
+
+# %%
+#| code-fold: true
+def plot_pdf_cdf_accumulation_gif(
+    x, pdf, cdf, n_frames=40, seconds=4.0, hold_seconds=0.8
+):
+    """
+    Left panel: PDF with the area from the start of x up to a sweeping point x0
+    shaded in. Right panel: CDF curve with a marker at (x0, CDF(x0)).
+    Shows that the CDF is the running cumulative area under the PDF.
+    """
+    import base64
+    import io
+
+    from IPython.display import HTML, display
+    from PIL import Image
+
+    idx = np.linspace(0, len(x) - 1, n_frames).astype(int)
+
+    frames = []
+    for i in idx:
+        x0 = x[i]
+
+        fig, ax = plt.subplots(1, 2, figsize=(12, 4.5))
+
+        ax[0].plot(x, pdf, color="steelblue")
+        ax[0].fill_between(x[: i + 1], pdf[: i + 1], color="steelblue", alpha=0.4)
+        ax[0].axvline(x0, color="crimson", linestyle="--", linewidth=1)
+        ax[0].set_title("PDF: shaded area accumulates")
+        ax[0].set_ylabel("Density")
+
+        ax[1].plot(x, cdf, color="steelblue")
+        ax[1].scatter([x0], [cdf[i]], color="crimson", zorder=5, s=40)
+        ax[1].plot([x0, x0], [0, cdf[i]], color="crimson", linestyle="--", linewidth=1)
+        ax[1].plot([x[0], x0], [cdf[i], cdf[i]], color="crimson", linestyle="--", linewidth=1)
+        ax[1].set_ylim(0, 1.05)
+        ax[1].set_title("CDF: running total of that area")
+        ax[1].set_ylabel("Probability")
+
+        for a in ax:
+            a.set_xlabel("Value")
+            a.set_xlim(x[0], x[-1])
+
+        fig.suptitle(f"Area up to $x_0={x0:.1f}$ is CDF($x_0$) = {cdf[i]:.2f}")
+        plt.tight_layout()
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=80)
+        plt.close(fig)
+        buf.seek(0)
+        frames.append(Image.open(buf).convert("RGB"))
+
+    frame_duration = int(1000 * seconds / n_frames)
+    hold_duration = int(1000 * hold_seconds)
+    durations = [frame_duration] * n_frames
+    durations[0] = hold_duration
+    durations[-1] = hold_duration
+
+    gif_buf = io.BytesIO()
+    frames[0].save(
+        gif_buf,
+        format="GIF",
+        save_all=True,
+        append_images=frames[1:],
+        duration=durations,
+        loop=0,
+    )
+    gif_buf.seek(0)
+
+    # Quarto's HTML renderer does not pick up embedded image/gif outputs, so we
+    # emit an <img> tag with the GIF inlined as a base64 data URI instead.
+    gif_b64 = base64.b64encode(gif_buf.getvalue()).decode("ascii")
+    display(HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="PDF to CDF accumulation">'))
+
+
+plot_pdf_cdf_accumulation_gif(x, pdf, cdf, seconds=8.0, hold_seconds=1.6)
 
 # %% [markdown] id="XFr1E3lPnVZS"
 # ### Not All Distributions Look the Same

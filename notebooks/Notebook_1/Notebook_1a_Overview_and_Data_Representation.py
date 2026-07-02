@@ -1092,13 +1092,157 @@ plot_matrix_flow_and_morph_gif(A_exercise, title="My Matrix Flow Field")
 # - zero if perpendicular
 # - negative if opposite
 #
+# These facts all come from a second formula for the same quantity, this time in
+# terms of lengths and the angle $\theta$ between the two vectors:
+#
+# $$
+# \mathbf{a} \cdot \mathbf{b} = \|\mathbf{a}\| \, \|\mathbf{b}\| \cos\theta
+# $$
+#
+# $\|\mathbf{a}\|\cos\theta$ is exactly how far $\mathbf{a}$ reaches *along* the
+# direction of $\mathbf{b}$ — its **projection** onto $\mathbf{b}$. The dot product
+# is that projected length, scaled by $\|\mathbf{b}\|$. This is also where **cosine
+# similarity** comes from: dividing both sides by $\|\mathbf{a}\|\|\mathbf{b}\|$
+# isolates $\cos\theta$ itself, a similarity score that ignores length and only asks
+# "how aligned are these two directions?"
+#
 # Machine learning uses dot products everywhere:
 #
 # - linear regression predictions
 # - logistic regression decisions
 # - neural network activations
 # - cosine similarity
-#
+
+# %% [markdown]
+# The animation below fixes $\mathbf{b}$ and rotates $\mathbf{a}$ through a full
+# circle. The left panel shows the two vectors, the angle $\theta$ between them, and
+# the projection of $\mathbf{a}$ onto $\mathbf{b}$ (dashed) whose length is
+# $\|\mathbf{a}\|\cos\theta$. The right panel plots $\mathbf{a} \cdot \mathbf{b}$
+# against $\theta$ — literally a cosine curve, scaled by $\|\mathbf{a}\|\|\mathbf{b}\|$.
+
+# %%
+#| code-fold: true
+def plot_dot_product_cosine_gif(
+    a_len=3.0, b=(3.0, 0.0), n_frames=48, seconds=4.0, hold_seconds=0.6
+):
+    """
+    Left panel: b fixed, a rotating through a full circle, with the angle theta
+    marked and the projection of a onto b drawn (length ||a|| cos(theta)).
+    Right panel: a . b plotted against theta -- a cosine curve.
+    """
+    import base64
+    import io
+
+    from IPython.display import HTML, display
+    from PIL import Image
+
+    b = np.array(b, dtype=float)
+    b_hat = b / np.linalg.norm(b)
+
+    angles_deg = np.linspace(0, 360, n_frames, endpoint=False)
+    lim = a_len * 1.3
+
+    # Full curve of a.b vs theta, computed once (doesn't change frame to frame).
+    curve_theta = np.linspace(0, 360, 361)
+    curve_dot = a_len * np.linalg.norm(b) * np.cos(np.radians(curve_theta))
+
+    frames = []
+    for theta_deg in angles_deg:
+        theta = np.radians(theta_deg)
+        a = a_len * np.array([np.cos(theta), np.sin(theta)])
+        dot = np.dot(a, b)
+        cos_theta = np.cos(theta)  # b lies along the x-axis, so this is exact
+
+        proj_len = np.dot(a, b_hat)  # ||a|| cos(theta)
+        proj_point = proj_len * b_hat
+
+        fig, (ax_vec, ax_curve) = plt.subplots(1, 2, figsize=(12, 5.5))
+
+        # Left: the two vectors, angle arc, and projection
+        ax_vec.annotate(
+            "", xy=b, xytext=(0, 0), arrowprops=dict(color="navy", width=2, headwidth=8)
+        )
+        ax_vec.annotate(
+            "",
+            xy=a,
+            xytext=(0, 0),
+            arrowprops=dict(color="crimson", width=2, headwidth=8),
+        )
+        ax_vec.text(*(b * 1.08), "b", color="navy", fontsize=12)
+        ax_vec.text(*(a * 1.08), "a", color="crimson", fontsize=12)
+
+        arc_angles = np.linspace(0, theta, 40)
+        arc_r = 0.35 * a_len
+        ax_vec.plot(
+            arc_r * np.cos(arc_angles), arc_r * np.sin(arc_angles), color="0.4"
+        )
+
+        ax_vec.plot(
+            [0, proj_point[0]], [0, proj_point[1]], linestyle="--", color="gray"
+        )
+        ax_vec.plot(
+            [a[0], proj_point[0]], [a[1], proj_point[1]], linestyle="--", color="gray"
+        )
+        ax_vec.scatter(*proj_point, color="gray", zorder=5, s=25)
+
+        ax_vec.axhline(0, color="0.85", linewidth=1)
+        ax_vec.axvline(0, color="0.85", linewidth=1)
+        ax_vec.set_xlim(-lim, lim)
+        ax_vec.set_ylim(-lim, lim)
+        ax_vec.set_aspect("equal", adjustable="box")
+        ax_vec.set_title(
+            f"$\\theta={theta_deg:.0f}^\\circ$, "
+            f"$\\cos\\theta={cos_theta:.2f}$, "
+            f"$a \\cdot b={dot:.2f}$"
+        )
+
+        # Right: a.b as a function of theta, with a marker at the current angle
+        ax_curve.plot(curve_theta, curve_dot, color="steelblue")
+        ax_curve.axhline(0, color="0.7", linewidth=1)
+        ax_curve.scatter([theta_deg], [dot], color="crimson", zorder=5, s=40)
+        ax_curve.set_xlim(0, 360)
+        ax_curve.set_xticks([0, 90, 180, 270, 360])
+        ax_curve.set_xlabel(r"$\theta$ (degrees)")
+        ax_curve.set_ylabel(r"$a \cdot b$")
+        ax_curve.set_title(r"$a \cdot b = \|a\|\|b\|\cos\theta$")
+
+        fig.suptitle("Dot Product as Length Times Cosine of the Angle")
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=80)
+        plt.close(fig)
+        buf.seek(0)
+        frames.append(Image.open(buf).convert("RGB"))
+
+    # Hold a little longer at the four angles that make the geometric facts land.
+    frame_duration = int(1000 * seconds / n_frames)
+    hold_duration = int(1000 * hold_seconds)
+    key_angles = {0, 90, 180, 270}
+    durations = [
+        hold_duration if round(t) in key_angles else frame_duration
+        for t in angles_deg
+    ]
+
+    gif_buf = io.BytesIO()
+    frames[0].save(
+        gif_buf,
+        format="GIF",
+        save_all=True,
+        append_images=frames[1:],
+        duration=durations,
+        loop=0,
+    )
+    gif_buf.seek(0)
+
+    # Quarto's HTML renderer does not pick up embedded image/gif outputs, so we
+    # emit an <img> tag with the GIF inlined as a base64 data URI instead.
+    gif_b64 = base64.b64encode(gif_buf.getvalue()).decode("ascii")
+    display(HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="Dot product and cosine">'))
+
+
+plot_dot_product_cosine_gif(a_len=3.0, b=(3.0, 0.0))
+
+# %% [markdown]
+# Now check these same facts on concrete vectors.
 
 # %% colab={"base_uri": "https://localhost:8080/"} executionInfo={"elapsed": 8, "status": "ok", "timestamp": 1766276548420, "user": {"displayName": "Eva Dyer", "userId": "13751912255938119410"}, "user_tz": 300} id="9O0QkDbSyGlL" outputId="cd8675ee-6983-4099-e79e-d9ecd33088b1"
 a = np.array([2, 1])
