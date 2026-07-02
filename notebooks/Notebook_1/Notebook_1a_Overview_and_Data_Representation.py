@@ -572,135 +572,6 @@ print("shape", M.T.shape)
 pow_two = 2 ** np.arange(4, 12)
 print(pow_two)
 
-# %% [markdown] id="jaNt1da2u0y_"
-# ## Measuring Distance: Lᵖ Norms
-#
-# Once we represent data as vectors, we need a way to measure **distance** between them.
-# Distance defines:
-#
-# - what it means for two points to be “similar”
-# - how nearest-neighbor models behave
-# - how optimization moves in parameter space
-# - how geometry shapes learning
-#
-# A powerful general way to define distance is through **Lᵖ norms**.
-#
-# For a vector:
-#
-# $$
-# \mathbf{x} = (x_1, x_2, ..., x_n)
-# $$
-#
-# the **Lᵖ norm** is:
-#
-# $$
-# \|\mathbf{x}\|_p =
-# \left( \sum_{i=1}^n |x_i|^p \right)^{1/p}
-# $$
-#
-# Two important special cases:
-#
-# ### L2 norm (Euclidean distance)
-# $$
-# \|\mathbf{x}\|_2 = \sqrt{x_1^2 + x_2^2 + ... + x_n^2}
-# $$
-#
-# - “straight-line distance”
-# - rotationally symmetric
-# - what we naturally think of as distance
-#
-# ### L1 norm (Manhattan distance)
-# $$
-# \|\mathbf{x}\|_1 = |x_1| + |x_2| + ... + |x_n|
-# $$
-#
-# - distance if you can only move horizontally & vertically
-# - less sensitive to outliers
-# - promotes sparsity in modeling (later: LASSO!)
-#
-# Different norms = different geometry = different behavior.
-# Let’s visualize.
-#
-
-# %% colab={"base_uri": "https://localhost:8080/", "height": 638} executionInfo={"elapsed": 371, "status": "ok", "timestamp": 1766276548179, "user": {"displayName": "Eva Dyer", "userId": "13751912255938119410"}, "user_tz": 300} id="MLfpv8bmu0RF" outputId="012eef62-4041-4485-af06-f1b4de3307da"
-import matplotlib.pyplot as plt
-import numpy as np
-
-# Create grid
-grid = np.linspace(-1.5, 1.5, 500)
-X, Y = np.meshgrid(grid, grid)
-
-points = np.stack([X, Y], axis=-1)  # shape (N,N,2)
-
-# Compute norms (distance from the origin to every point on the grid)
-L2 = np.linalg.norm(points, ord=2, axis=-1)
-L1 = np.linalg.norm(points, ord=1, axis=-1)
-
-# Now look at two concrete points on the grid, and see how L1 vs L2
-# actually get from one to the other.
-A = np.array([1, 1])
-B = np.array([3, 2])
-
-dist_L2_AB = np.linalg.norm(B - A, ord=2)
-dist_L1_AB = np.linalg.norm(B - A, ord=1)
-
-# %%
-#| code-fold: true
-fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-
-# Left: unit contours centered at the origin (as before)
-ax = axes[0]
-ax.contour(X, Y, L2, levels=[1], colors="blue", linewidths=3)
-ax.contour(X, Y, L1, levels=[1], colors="red", linewidths=3)
-ax.axhline(0, color="gray", linewidth=1)
-ax.axvline(0, color="gray", linewidth=1)
-ax.set_aspect("equal", adjustable="box")
-ax.set_title("Unit Contours of L1 vs L2 Norms\n(centered at the origin)")
-ax.legend(
-    handles=[
-        plt.Line2D([0], [0], color="blue", lw=3, label="L2 norm"),
-        plt.Line2D([0], [0], color="red", lw=3, label="L1 norm"),
-    ]
-)
-
-# Right: how L2 and L1 actually measure the distance between two points.
-# L2 is the straight-line ("as the crow flies") path.
-# L1 is a "staircase" path that only moves along one axis at a time —
-# the total length is the same no matter which staircase you draw.
-ax = axes[1]
-ax.plot(
-    *zip(A, B), color="blue", linewidth=3, label=f"L2 path (length {dist_L2_AB:.2f})"
-)
-ax.plot(
-    [A[0], B[0], B[0]],
-    [A[1], A[1], B[1]],
-    color="red",
-    linewidth=3,
-    label=f"L1 path (length {dist_L1_AB:.2f})",
-)
-ax.scatter(*A, color="black", zorder=5)
-ax.annotate("A (1, 1)", A, textcoords="offset points", xytext=(8, -14))
-ax.scatter(*B, color="black", zorder=5)
-ax.annotate("B (3, 2)", B, textcoords="offset points", xytext=(8, 8))
-ax.set_xlim(0, 4)
-ax.set_ylim(0, 3)
-ax.set_aspect("equal", adjustable="box")
-ax.grid(True, linewidth=0.5, alpha=0.5)
-ax.set_title(
-    f"How L1 vs L2 Compute Distance from A to B\n"
-    f"L2 = $\\sqrt{{(3-1)^2 + (2-1)^2}}$ = {dist_L2_AB:.2f},   "
-    f"L1 = $|3-1| + |2-1|$ = {dist_L1_AB:.2f}"
-)
-ax.legend()
-
-plt.tight_layout()
-plt.show()
-
-
-# %% [markdown] id="rVMDTZJutCt9"
-# ### More resources
-# - [NumPy: The Absolute Basics for Beginners](https://numpy.org/doc/stable/user/absolute_beginners.html)
-
 # %% [markdown] id="QGvN-41qwb6v"
 # ## Matrix-Vector Operations
 #
@@ -778,6 +649,42 @@ print("Matrix A:\n", A)
 print("\nVector x:\n", x)
 print("\nResult A x:\n", Ax)
 
+# %% [markdown]
+# ### Vectors as Points or Arrows
+#
+# Before asking what a matrix does to a vector, it helps to fix how we *picture*
+# a vector in the first place. The vector $\mathbf{x} = [4, 1]$ from above can be
+# drawn two equivalent ways:
+#
+# - as a **point** at coordinates $(4, 1)$ in the plane, or
+# - as an **arrow** starting at the origin $(0, 0)$ and ending at $(4, 1)$.
+#
+# Both pictures carry the same information — the arrow is just the point with
+# its direction and distance from the origin made visible. We will use both
+# throughout this notebook: points when we care about *where* data lands,
+# arrows when we care about *how far and which way* it moved.
+
+# %%
+#| code-fold: true
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(5, 5))
+ax.scatter(*x, color="black", s=60, zorder=5, label="as a point")
+ax.annotate("(4, 1)", x, textcoords="offset points", xytext=(8, 5))
+ax.annotate(
+    "", xy=x, xytext=(0, 0), arrowprops=dict(color="crimson", width=2, headwidth=8)
+)
+ax.plot([], [], color="crimson", linewidth=2, label="as an arrow")
+ax.axhline(0, color="0.85", linewidth=1)
+ax.axvline(0, color="0.85", linewidth=1)
+ax.set_xlim(-1, 5)
+ax.set_ylim(-1, 5)
+ax.set_aspect("equal", adjustable="box")
+ax.set_xlabel("feature 1")
+ax.set_ylabel("feature 2")
+ax.set_title("The Same Vector, Two Pictures")
+ax.legend(loc="upper left")
+plt.show()
 
 # %% [markdown] id="1bxogGVXxFlg"
 # ### What did the matrix *do*?
@@ -1341,6 +1248,135 @@ print("inv(A):\n", np.linalg.inv(A))
 # Which stretches?
 # Which squashes?
 #
+
+# %% [markdown] id="jaNt1da2u0y_"
+# ## Measuring Distance: Lᵖ Norms
+#
+# Once we represent data as vectors, we need a way to measure **distance** between them.
+# Distance defines:
+#
+# - what it means for two points to be “similar”
+# - how nearest-neighbor models behave
+# - how optimization moves in parameter space
+# - how geometry shapes learning
+#
+# A powerful general way to define distance is through **Lᵖ norms**.
+#
+# For a vector:
+#
+# $$
+# \mathbf{x} = (x_1, x_2, ..., x_n)
+# $$
+#
+# the **Lᵖ norm** is:
+#
+# $$
+# \|\mathbf{x}\|_p =
+# \left( \sum_{i=1}^n |x_i|^p \right)^{1/p}
+# $$
+#
+# Two important special cases:
+#
+# ### L2 norm (Euclidean distance)
+# $$
+# \|\mathbf{x}\|_2 = \sqrt{x_1^2 + x_2^2 + ... + x_n^2}
+# $$
+#
+# - “straight-line distance”
+# - rotationally symmetric
+# - what we naturally think of as distance
+#
+# ### L1 norm (Manhattan distance)
+# $$
+# \|\mathbf{x}\|_1 = |x_1| + |x_2| + ... + |x_n|
+# $$
+#
+# - distance if you can only move horizontally & vertically
+# - less sensitive to outliers
+# - promotes sparsity in modeling (later: LASSO!)
+#
+# Different norms = different geometry = different behavior.
+# Let’s visualize.
+#
+
+# %% colab={"base_uri": "https://localhost:8080/", "height": 638} executionInfo={"elapsed": 371, "status": "ok", "timestamp": 1766276548179, "user": {"displayName": "Eva Dyer", "userId": "13751912255938119410"}, "user_tz": 300} id="MLfpv8bmu0RF" outputId="012eef62-4041-4485-af06-f1b4de3307da"
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Create grid
+grid = np.linspace(-1.5, 1.5, 500)
+X, Y = np.meshgrid(grid, grid)
+
+points = np.stack([X, Y], axis=-1)  # shape (N,N,2)
+
+# Compute norms (distance from the origin to every point on the grid)
+L2 = np.linalg.norm(points, ord=2, axis=-1)
+L1 = np.linalg.norm(points, ord=1, axis=-1)
+
+# Now look at two concrete points on the grid, and see how L1 vs L2
+# actually get from one to the other.
+A = np.array([1, 1])
+B = np.array([3, 2])
+
+dist_L2_AB = np.linalg.norm(B - A, ord=2)
+dist_L1_AB = np.linalg.norm(B - A, ord=1)
+
+# %%
+#| code-fold: true
+fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+
+# Left: how L2 and L1 actually measure the distance between two points.
+# L2 is the straight-line ("as the crow flies") path.
+# L1 is a "staircase" path that only moves along one axis at a time —
+# the total length is the same no matter which staircase you draw.
+ax = axes[0]
+ax.plot(
+    *zip(A, B), color="blue", linewidth=3, label=f"L2 path (length {dist_L2_AB:.2f})"
+)
+ax.plot(
+    [A[0], B[0], B[0]],
+    [A[1], A[1], B[1]],
+    color="red",
+    linewidth=3,
+    label=f"L1 path (length {dist_L1_AB:.2f})",
+)
+ax.scatter(*A, color="black", zorder=5)
+ax.annotate("A (1, 1)", A, textcoords="offset points", xytext=(8, -14))
+ax.scatter(*B, color="black", zorder=5)
+ax.annotate("B (3, 2)", B, textcoords="offset points", xytext=(8, 8))
+ax.set_xlim(0, 4)
+ax.set_ylim(0, 3)
+ax.set_aspect("equal", adjustable="box")
+ax.grid(True, linewidth=0.5, alpha=0.5)
+ax.set_title(
+    f"How L1 vs L2 Compute Distance from A to B\n"
+    f"L2 = $\\sqrt{{(3-1)^2 + (2-1)^2}}$ = {dist_L2_AB:.2f},   "
+    f"L1 = $|3-1| + |2-1|$ = {dist_L1_AB:.2f}"
+)
+ax.legend()
+
+# Right: unit contours centered at the origin (as before)
+ax = axes[1]
+ax.contour(X, Y, L2, levels=[1], colors="blue", linewidths=3)
+ax.contour(X, Y, L1, levels=[1], colors="red", linewidths=3)
+ax.axhline(0, color="gray", linewidth=1)
+ax.axvline(0, color="gray", linewidth=1)
+ax.set_aspect("equal", adjustable="box")
+ax.set_title("Unit Contours of L1 vs L2 Norms\n(centered at the origin)")
+ax.legend(
+    handles=[
+        plt.Line2D([0], [0], color="blue", lw=3, label="L2 norm"),
+        plt.Line2D([0], [0], color="red", lw=3, label="L1 norm"),
+    ]
+)
+
+plt.tight_layout()
+plt.show()
+
+
+# %% [markdown] id="rVMDTZJutCt9"
+# ### More resources
+# - [NumPy: The Absolute Basics for Beginners](https://numpy.org/doc/stable/user/absolute_beginners.html)
 
 # %% [markdown] id="ayBIw7uGmqF8"
 # ## Images
