@@ -484,33 +484,102 @@ y = np.linspace(-4, 4, 200)
 X, Y = np.meshgrid(x, y)
 Z = X**2 + 0.5 * Y**2 + 1
 
-fig = plt.figure(figsize=(13, 6))
+# %%
+#| code-fold: true
+def plot_gradient_descent_2d3d_gif(
+    trajectory, trajectory_loss, X, Y, Z, seconds=8.0, hold_seconds=1.2
+):
+    """
+    Animate gradient descent on a 2D loss landscape: reveal one more step of
+    the trajectory per frame, on both the contour view and the 3D surface.
+    """
+    import base64
+    import io
 
-ax_2d = fig.add_subplot(1, 2, 1)
-ax_2d.contour(X, Y, Z, levels=20)
-ax_2d.plot(trajectory[:, 0], trajectory[:, 1], marker="o", color="red")
-ax_2d.set_title("Gradient Descent Path on 2D Loss Landscape")
-ax_2d.set_xlabel("x")
-ax_2d.set_ylabel("y")
-ax_2d.set_aspect("equal")
+    from IPython.display import HTML, display
+    from PIL import Image
 
-ax_3d = fig.add_subplot(1, 2, 2, projection="3d")
-ax_3d.plot_surface(X, Y, Z, cmap="viridis", alpha=0.6, linewidth=0, antialiased=True)
-ax_3d.plot(
-    trajectory[:, 0],
-    trajectory[:, 1],
-    trajectory_loss,
-    marker="o",
-    color="red",
-    markersize=4,
-)
-ax_3d.set_title("Same Path on the 3D Loss Surface")
-ax_3d.set_xlabel("x")
-ax_3d.set_ylabel("y")
-ax_3d.set_zlabel("loss")
+    n_frames = len(trajectory)
 
-plt.tight_layout()
-plt.show()
+    frames = []
+    for i in range(n_frames):
+        fig = plt.figure(figsize=(13, 6))
+
+        ax_2d = fig.add_subplot(1, 2, 1)
+        ax_2d.contour(X, Y, Z, levels=20)
+        ax_2d.plot(
+            trajectory[: i + 1, 0], trajectory[: i + 1, 1], marker="o", color="red"
+        )
+        ax_2d.scatter(
+            trajectory[i, 0], trajectory[i, 1], color="darkorange", s=90, zorder=5
+        )
+        ax_2d.set_title("Gradient Descent Path on 2D Loss Landscape")
+        ax_2d.set_xlabel("x")
+        ax_2d.set_ylabel("y")
+        ax_2d.set_aspect("equal")
+
+        ax_3d = fig.add_subplot(1, 2, 2, projection="3d")
+        ax_3d.plot_surface(
+            X, Y, Z, cmap="viridis", alpha=0.6, linewidth=0, antialiased=True
+        )
+        ax_3d.plot(
+            trajectory[: i + 1, 0],
+            trajectory[: i + 1, 1],
+            trajectory_loss[: i + 1],
+            marker="o",
+            color="red",
+            markersize=4,
+        )
+        ax_3d.scatter(
+            trajectory[i, 0],
+            trajectory[i, 1],
+            trajectory_loss[i],
+            color="darkorange",
+            s=60,
+        )
+        ax_3d.set_title("Same Path on the 3D Loss Surface")
+        ax_3d.set_xlabel("x")
+        ax_3d.set_ylabel("y")
+        ax_3d.set_zlabel("loss")
+
+        fig.suptitle(
+            f"Step {i}/{n_frames - 1}: (x, y)=({trajectory[i, 0]:.2f}, "
+            f"{trajectory[i, 1]:.2f}), loss={trajectory_loss[i]:.2f}"
+        )
+        plt.tight_layout()
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=80)
+        plt.close(fig)
+        buf.seek(0)
+        frames.append(Image.open(buf).convert("RGB"))
+
+    frame_duration = int(1000 * seconds / n_frames)
+    hold_duration = int(1000 * hold_seconds)
+    durations = [frame_duration] * n_frames
+    durations[0] = hold_duration
+    durations[-1] = hold_duration
+
+    gif_buf = io.BytesIO()
+    frames[0].save(
+        gif_buf,
+        format="GIF",
+        save_all=True,
+        append_images=frames[1:],
+        duration=durations,
+        loop=0,
+    )
+    gif_buf.seek(0)
+
+    # Quarto's HTML renderer does not pick up embedded image/gif outputs, so we
+    # emit an <img> tag with the GIF inlined as a base64 data URI instead.
+    gif_b64 = base64.b64encode(gif_buf.getvalue()).decode("ascii")
+    display(
+        HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="Gradient descent 2D/3D">')
+    )
+
+
+plot_gradient_descent_2d3d_gif(trajectory, trajectory_loss, X, Y, Z)
 
 
 # %% [markdown] id="VpGIH0Oy5H92"
@@ -576,10 +645,20 @@ for _ in range(200):
     b -= eta * db
     losses.append(mse(y_pred, y))
 
-plt.plot(losses)
-plt.title("Training Loss Over Iterations")
-plt.xlabel("Iteration")
-plt.ylabel("MSE")
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+axes[0].plot(losses)
+axes[0].set_title("Training Loss Over Iterations")
+axes[0].set_xlabel("Iteration")
+axes[0].set_ylabel("MSE")
+
+axes[1].plot(losses)
+axes[1].set_yscale("log")
+axes[1].set_title("Same Loss, Log Scale on Y")
+axes[1].set_xlabel("Iteration")
+axes[1].set_ylabel("MSE (log scale)")
+
+plt.tight_layout()
 plt.show()
 
 print("Learned w:", w)

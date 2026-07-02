@@ -270,23 +270,6 @@ x = np.linspace(20, 80, 500)
 pdf = norm.pdf(x, loc=50, scale=8)
 cdf = norm.cdf(x, loc=50, scale=8)
 
-# %%
-#| code-fold: true
-fig, ax = plt.subplots(1, 2, figsize=(12, 4))
-
-ax[0].plot(x, pdf)
-ax[0].set_title("Probability Density Function (PDF)")
-ax[0].set_ylabel("Density")
-
-ax[1].plot(x, cdf)
-ax[1].set_title("Cumulative Distribution Function (CDF)")
-ax[1].set_ylabel("Probability")
-for a in ax:
-    a.set_xlabel("Value")
-
-plt.suptitle("PDF vs CDF — Two Views of the Same Distribution")
-plt.show()
-
 # %% [markdown]
 # The CDF is literally the *running total* of the area under the PDF. The
 # animation below sweeps a value $x_0$ from left to right: the shaded area under
