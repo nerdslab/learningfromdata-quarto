@@ -119,20 +119,89 @@ best_idx = np.argmin(values)
 best_beta = candidates[best_idx]
 best_loss = values[best_idx]
 
+# %% [markdown]
+# The animation below shows the search unfolding over time: each frame tries one
+# more candidate value (orange), and the best value found *so far* (red) only
+# updates when a new candidate beats it.
+
 # %%
 #| code-fold: true
-plt.figure(figsize=(7, 5))
-plt.plot(candidates, values, label="loss function")
-plt.scatter(best_beta, best_loss, color="red", s=80, label="Best found")
-plt.title("Searching for Best Parameter by Trying Many Values")
-plt.xlabel("beta")
-plt.ylabel("Loss")
-plt.legend()
-plt.show()
+def plot_grid_search_over_time_gif(
+    candidates, values, n_frames=50, seconds=5.0, hold_seconds=1.2
+):
+    """
+    Animate a 1D grid search: sweep through candidates one at a time, tracking
+    the best (candidate, loss) found so far.
+    """
+    import base64
+    import io
 
-print("Best beta found:", best_beta)
-print("Loss at best beta:", best_loss)
+    from IPython.display import HTML, display
+    from PIL import Image
 
+    idx = np.linspace(0, len(candidates) - 1, n_frames).astype(int)
+
+    frames = []
+    for i in idx:
+        seen_values = values[: i + 1]
+        best_i = np.argmin(seen_values)
+        cur_best_beta = candidates[best_i]
+        cur_best_loss = seen_values[best_i]
+
+        fig, ax = plt.subplots(figsize=(7, 5))
+        ax.plot(candidates, values, color="0.8", label="loss function")
+        ax.scatter(
+            candidates[: i + 1], seen_values, color="steelblue", s=12, alpha=0.5,
+            label="tried so far",
+        )
+        ax.scatter(
+            candidates[i], values[i], color="darkorange", s=90, zorder=5,
+            label="current candidate",
+        )
+        ax.scatter(
+            cur_best_beta, cur_best_loss, color="red", s=110, zorder=6,
+            label="best so far",
+        )
+        ax.set_xlim(candidates[0], candidates[-1])
+        ax.set_ylim(values.min() - 0.5, values.max() + 0.5)
+        ax.set_xlabel("beta")
+        ax.set_ylabel("Loss")
+        ax.set_title(
+            f"Tried {i + 1}/{len(candidates)} candidates — "
+            f"best so far: beta={cur_best_beta:.2f}, loss={cur_best_loss:.2f}"
+        )
+        ax.legend(loc="upper center")
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=80)
+        plt.close(fig)
+        buf.seek(0)
+        frames.append(Image.open(buf).convert("RGB"))
+
+    frame_duration = int(1000 * seconds / n_frames)
+    hold_duration = int(1000 * hold_seconds)
+    durations = [frame_duration] * n_frames
+    durations[0] = hold_duration
+    durations[-1] = hold_duration
+
+    gif_buf = io.BytesIO()
+    frames[0].save(
+        gif_buf,
+        format="GIF",
+        save_all=True,
+        append_images=frames[1:],
+        duration=durations,
+        loop=0,
+    )
+    gif_buf.seek(0)
+
+    # Quarto's HTML renderer does not pick up embedded image/gif outputs, so we
+    # emit an <img> tag with the GIF inlined as a base64 data URI instead.
+    gif_b64 = base64.b64encode(gif_buf.getvalue()).decode("ascii")
+    display(HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="Grid search over time">'))
+
+
+plot_grid_search_over_time_gif(candidates, values)
 
 # %% [markdown] id="BELSqeSs_KIy"
 # ### What did we just do?
@@ -222,17 +291,83 @@ for _ in range(20):
     beta = beta - eta * grad(beta)
     trajectory.append(beta)
 
+# %% [markdown]
+# Just like the grid search above, a static plot only shows where gradient descent
+# *ended up*. The animation below shows the steps themselves: each frame takes one
+# more step down the loss curve, following the local slope.
+
 # %%
 #| code-fold: true
-# Plot
-b = np.linspace(-6, 6, 200)
-plt.figure(figsize=(7, 5))
-plt.plot(b, loss(b))
-plt.scatter(trajectory, [loss(x) for x in trajectory], color="red")
-plt.title("Gradient Descent in 1D")
-plt.xlabel("beta")
-plt.ylabel("Loss")
-plt.show()
+def plot_gradient_descent_1d_gif(
+    loss, trajectory, seconds=5.0, hold_seconds=1.2
+):
+    """
+    Animate 1D gradient descent: reveal one more step of the trajectory per
+    frame, with a trail connecting the steps taken so far.
+    """
+    import base64
+    import io
+
+    from IPython.display import HTML, display
+    from PIL import Image
+
+    b = np.linspace(-6, 6, 200)
+    curve = loss(b)
+    trajectory = np.array(trajectory)
+    losses = loss(trajectory)
+
+    n_frames = len(trajectory)
+
+    frames = []
+    for i in range(n_frames):
+        fig, ax = plt.subplots(figsize=(7, 5))
+        ax.plot(b, curve, color="steelblue")
+        ax.plot(
+            trajectory[: i + 1], losses[: i + 1], color="red", alpha=0.5, linewidth=1
+        )
+        ax.scatter(
+            trajectory[: i + 1], losses[: i + 1], color="red", s=35, alpha=0.6
+        )
+        ax.scatter(trajectory[i], losses[i], color="darkorange", s=90, zorder=5)
+        ax.set_xlim(-6, 6)
+        ax.set_ylim(curve.min() - 0.5, curve.max() + 0.5)
+        ax.set_xlabel("beta")
+        ax.set_ylabel("Loss")
+        ax.set_title(
+            f"Gradient Descent in 1D — step {i}/{n_frames - 1}: "
+            f"beta={trajectory[i]:.2f}, loss={losses[i]:.2f}"
+        )
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=80)
+        plt.close(fig)
+        buf.seek(0)
+        frames.append(Image.open(buf).convert("RGB"))
+
+    frame_duration = int(1000 * seconds / n_frames)
+    hold_duration = int(1000 * hold_seconds)
+    durations = [frame_duration] * n_frames
+    durations[0] = hold_duration
+    durations[-1] = hold_duration
+
+    gif_buf = io.BytesIO()
+    frames[0].save(
+        gif_buf,
+        format="GIF",
+        save_all=True,
+        append_images=frames[1:],
+        duration=durations,
+        loop=0,
+    )
+    gif_buf.seek(0)
+
+    # Quarto's HTML renderer does not pick up embedded image/gif outputs, so we
+    # emit an <img> tag with the GIF inlined as a base64 data URI instead.
+    gif_b64 = base64.b64encode(gif_buf.getvalue()).decode("ascii")
+    display(HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="Gradient descent over time">'))
+
+
+plot_gradient_descent_1d_gif(loss, trajectory)
 
 
 # %% [markdown]
@@ -879,11 +1014,11 @@ print("Test error:", test_error)
 # The model now looks more complex, the red curve passes through most training samples, but no longer matches the true function well. While the train error decreases, the test error starts increasing significatly: the model is **overfitting**.
 
 # %% [markdown]
-# ### Interactive Model Complexity Demo
+# ### Model Complexity Demo
 #
-# Polynomial degree is a hyperparameter that controls model complexity.
-#
-# Use the slider to watch the fitted curve change.
+# Polynomial degree is a hyperparameter that controls model complexity. The
+# animation below increases the degree one step at a time and refits the model at
+# each step, so you can watch the fitted curve change continuously.
 #
 # Look for:
 #
@@ -894,52 +1029,93 @@ print("Test error:", test_error)
 
 
 # %%
-def plot_polynomial_degree(deg=3):
-    X_train_poly = add_polynomial_features(X_train, deg=deg)
-    X_test_poly = add_polynomial_features(X_test, deg=deg)
+#| code-fold: true
+def plot_polynomial_degree_gif(degrees=None, seconds=15.0, hold_seconds=1.2):
+    """
+    Animate model complexity: refit a polynomial at each degree in `degrees`
+    and show train/test MSE alongside the fitted curve.
+    """
+    import base64
+    import io
 
-    model = LinearRegression()
-    model.fit(X_train_poly, y_train)
+    from IPython.display import HTML, display
+    from PIL import Image
 
-    train_pred = model.predict(X_train_poly)
-    test_pred = model.predict(X_test_poly)
-    train_error = compute_mean_squared_error(train_pred, y_train)
-    test_error = compute_mean_squared_error(test_pred, y_test)
-
+    if degrees is None:
+        # A polynomial of degree >= len(X_train) - 1 can perfectly interpolate
+        # the training set, so that's a natural, data-driven cap.
+        degrees = range(1, len(X_train) + 1)
+    degrees = list(degrees)
     x_grid = np.linspace(-0.05, 1.05, 400)
-    x_grid_poly = add_polynomial_features(x_grid, deg=deg)
 
-    plt.figure(figsize=(8, 5))
-    plt.scatter(X_train, y_train, label="train", alpha=0.8)
-    plt.scatter(X_test, y_test, label="test", alpha=0.8)
-    plt.plot(x_grid, f(x_grid), color="red", linewidth=2, label="true function")
-    plt.plot(
-        x_grid, model.predict(x_grid_poly), color="green", linewidth=2, label="model"
+    frames = []
+    for deg in degrees:
+        X_train_poly = add_polynomial_features(X_train, deg=deg)
+        X_test_poly = add_polynomial_features(X_test, deg=deg)
+
+        model = LinearRegression()
+        model.fit(X_train_poly, y_train)
+
+        train_pred = model.predict(X_train_poly)
+        test_pred = model.predict(X_test_poly)
+        train_error = compute_mean_squared_error(train_pred, y_train)
+        test_error = compute_mean_squared_error(test_pred, y_test)
+
+        x_grid_poly = add_polynomial_features(x_grid, deg=deg)
+
+        fig, ax = plt.subplots(figsize=(8, 5))
+        ax.scatter(X_train, y_train, label="train", alpha=0.8)
+        ax.scatter(X_test, y_test, label="test", alpha=0.8)
+        ax.plot(x_grid, f(x_grid), color="red", linewidth=2, label="true function")
+        ax.plot(
+            x_grid,
+            model.predict(x_grid_poly),
+            color="green",
+            linewidth=2,
+            label="model",
+        )
+        ax.set_ylim(-2, 2)
+        ax.set_title(
+            f"Polynomial degree {deg}: train MSE={train_error:.3f}, "
+            f"test MSE={test_error:.3f}"
+        )
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.legend(loc="upper right")
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", dpi=80)
+        plt.close(fig)
+        buf.seek(0)
+        frames.append(Image.open(buf).convert("RGB"))
+
+    n_frames = len(frames)
+    frame_duration = int(1000 * seconds / n_frames)
+    hold_duration = int(1000 * hold_seconds)
+    durations = [frame_duration] * n_frames
+    durations[0] = hold_duration
+    durations[-1] = hold_duration
+
+    gif_buf = io.BytesIO()
+    frames[0].save(
+        gif_buf,
+        format="GIF",
+        save_all=True,
+        append_images=frames[1:],
+        duration=durations,
+        loop=0,
     )
-    plt.ylim(-2, 2)
-    plt.title(
-        f"Polynomial degree {deg}: train MSE={train_error:.3f}, test MSE={test_error:.3f}"
+    gif_buf.seek(0)
+
+    # Quarto's HTML renderer does not pick up embedded image/gif outputs, so we
+    # emit an <img> tag with the GIF inlined as a base64 data URI instead.
+    gif_b64 = base64.b64encode(gif_buf.getvalue()).decode("ascii")
+    display(
+        HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="Model complexity">')
     )
-    plt.xlabel("x")
-    plt.ylabel("y")
-    plt.legend()
-    plt.show()
 
 
-try:
-    import ipywidgets as widgets
-    from IPython.display import display
-
-    ui = widgets.interactive(
-        plot_polynomial_degree,
-        deg=widgets.IntSlider(value=3, min=1, max=20, step=1, description="degree"),
-    )
-    display(ui)
-except Exception as e:
-    print("Widgets are not available here. Running selected examples instead.")
-    for degree in [1, 3, 10, 20]:
-        plot_polynomial_degree(degree)
-    print(e)
+plot_polynomial_degree_gif()
 
 
 # %% [markdown] id="AgbYe7Swx0jf"
