@@ -859,9 +859,10 @@ def plot_matrix_flow_and_morph_gif(
     arrow_length = np.linalg.norm(displacement, axis=1)
 
     # Grid lines (not just points) so the right panel shows the grid itself
-    # warping as the matrix is applied, not just where the nodes land.
-    line_coords = np.linspace(-2, 2, grid_size)
-    fine = np.linspace(-2, 2, 25)
+    # warping as the matrix is applied, not just where the nodes land. Span the
+    # full plot extent (-lim to lim), not just the range of the sample points.
+    line_coords = np.linspace(-lim, lim, grid_size)
+    fine = np.linspace(-lim, lim, 25)
     grid_lines = [np.stack([fine, np.full_like(fine, c)], axis=1) for c in line_coords]
     grid_lines += [np.stack([np.full_like(fine, c), fine], axis=1) for c in line_coords]
 

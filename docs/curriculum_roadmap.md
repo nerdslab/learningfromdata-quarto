@@ -84,8 +84,9 @@ as the bridge into inference. Fits existing slots (no additions).
 >
 > Geometric-covariance cells were extracted to
 > `notebooks/Notebook_5/_staging_covariance_geometry.py` (leading underscore → not
-> rendered, not in the book config). Fold them into **5a** when PCA is worked, and
-> update that file's badge URLs to 5a's path.
+> rendered, not in the book config), to be folded into **5a** when PCA was worked.
+> **Now folded in and the staging file removed** — see the "Geometric covariance →
+> 5a" section below.
 
 ### Key findings from the current notebooks
 
@@ -155,6 +156,33 @@ Per repo convention: edit the `.py`, then `jupytext --sync`; re-run
 
 ---
 
+## Geometric covariance → 5a  ✅ IMPLEMENTED
+
+**Finding:** 5a already had its own "Covariance as geometry" section (5-panel
+isotropic/stretched/tilted comparison, built around `add_covariance_ellipse`) leading
+into PCA — written independently of the M3 staging file, with different (wine-
+dataset-oriented) framing. The staging file's content was therefore mostly
+**redundant**, not missing. Two things it had that 5a didn't:
+
+1. A **badged exercise** on reading the panels (5a had the same three questions as
+   an unbadged "Discussion").
+2. An **interactive shape explorer** (sliders for `std_x`, `std_y`, `rho`).
+
+**Fold-in:** converted 5a's discussion into a badged exercise
+(`id="ex-covariance-shapes"`), then added the interactive explorer as a new
+`plot_covariance_explorer` cell reusing 5a's existing `add_covariance_ellipse`
+(overlaying eigenvector arrows), with its own badged exercise
+(`id="ex-covariance-explorer"`). Badges regenerated via
+`scripts/add_exercise_badges.py`; notebook re-executed
+(`CELL_TIMEOUT=300 scripts/execute_notebooks.sh` — the default 120s timeout was too
+short for an unrelated pre-existing t-SNE cell later in 5a); book re-rendered clean.
+
+`notebooks/Notebook_5/_staging_covariance_geometry.py`/`.ipynb` **removed** (never
+committed, so no history to preserve) — its unique value is now in 5a and the rest
+was duplicate of what 5a already had.
+
+---
+
 ## Other proposals (from handoff — not yet worked)
 
 *(M1 split — now ✅ implemented; see the M1 section below.)*
@@ -172,9 +200,17 @@ ridge/lasso.
 generalization. Recommendation: **keep as a structural keystone**, don't cut to a
 buffer or to fund DL (wrong time of year).
 
-🔧 **Type I/II spiral** (cross-module) — introduce in 3b (α, power = 1−β), quantify
+✅ **Type I/II spiral** (cross-module) — introduce in 3b (α, power = 1−β), quantify
 in 3c (power vs sample size/noise), reconnect in **4b** (confusion matrix FP/FN =
-Type I/II; "Error Costs" exercise = cost asymmetry).
+Type I/II; "Error Costs" exercise = cost asymmetry). **IMPLEMENTED.**
+
+> 4b already had FP/FN labeled "Type 1"/"Type 2" and an "Error Costs" exercise
+> (pre-existing, unrelated to this rework). Closed the loop: relabeled to match 3b/3c's
+> Roman-numeral convention, added a "Callback: Type I/II errors, from hypothesis tests
+> to classifiers" section connecting the confusion matrix to the $H_0$ table from 3b
+> (precision ↔ Type I, recall ↔ Type II, threshold ↔ α), and sharpened the exercise to
+> ask which error type dominates per scenario and how that trades off against the
+> decision threshold.
 
 ---
 
