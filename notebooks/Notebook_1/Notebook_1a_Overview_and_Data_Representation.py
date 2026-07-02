@@ -572,6 +572,10 @@ print("shape", M.T.shape)
 pow_two = 2 ** np.arange(4, 12)
 print(pow_two)
 
+# %% [markdown] id="rVMDTZJutCt9"
+# ### More resources
+# - [NumPy: The Absolute Basics for Beginners](https://numpy.org/doc/stable/user/absolute_beginners.html)
+
 # %% [markdown] id="QGvN-41qwb6v"
 # ## Matrix-Vector Operations
 #
@@ -1372,11 +1376,6 @@ ax.legend(
 
 plt.tight_layout()
 plt.show()
-
-
-# %% [markdown] id="rVMDTZJutCt9"
-# ### More resources
-# - [NumPy: The Absolute Basics for Beginners](https://numpy.org/doc/stable/user/absolute_beginners.html)
 
 # %% [markdown] id="ayBIw7uGmqF8"
 # ## Images
