@@ -807,6 +807,7 @@ print("The solution is:", ans)
 #
 
 # %%
+#| echo: false
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
