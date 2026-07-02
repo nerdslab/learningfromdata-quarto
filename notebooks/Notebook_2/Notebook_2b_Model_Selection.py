@@ -8,7 +8,8 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.19.4
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: venv (3.11.14)
+#     language: python
 #     name: python3
 # ---
 
@@ -151,15 +152,27 @@ def plot_grid_search_over_time_gif(
         fig, ax = plt.subplots(figsize=(7, 5))
         ax.plot(candidates, values, color="0.8", label="loss function")
         ax.scatter(
-            candidates[: i + 1], seen_values, color="steelblue", s=12, alpha=0.5,
+            candidates[: i + 1],
+            seen_values,
+            color="steelblue",
+            s=12,
+            alpha=0.5,
             label="tried so far",
         )
         ax.scatter(
-            candidates[i], values[i], color="darkorange", s=90, zorder=5,
+            candidates[i],
+            values[i],
+            color="darkorange",
+            s=90,
+            zorder=5,
             label="current candidate",
         )
         ax.scatter(
-            cur_best_beta, cur_best_loss, color="red", s=110, zorder=6,
+            cur_best_beta,
+            cur_best_loss,
+            color="red",
+            s=110,
+            zorder=6,
             label="best so far",
         )
         ax.set_xlim(candidates[0], candidates[-1])
@@ -198,7 +211,9 @@ def plot_grid_search_over_time_gif(
     # Quarto's HTML renderer does not pick up embedded image/gif outputs, so we
     # emit an <img> tag with the GIF inlined as a base64 data URI instead.
     gif_b64 = base64.b64encode(gif_buf.getvalue()).decode("ascii")
-    display(HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="Grid search over time">'))
+    display(
+        HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="Grid search over time">')
+    )
 
 
 plot_grid_search_over_time_gif(candidates, values)
@@ -297,9 +312,7 @@ for _ in range(20):
 
 # %%
 #| code-fold: true
-def plot_gradient_descent_1d_gif(
-    loss, trajectory, seconds=5.0, hold_seconds=1.2
-):
+def plot_gradient_descent_1d_gif(loss, trajectory, seconds=5.0, hold_seconds=1.2):
     """
     Animate 1D gradient descent: reveal one more step of the trajectory per
     frame, with a trail connecting the steps taken so far.
@@ -324,9 +337,7 @@ def plot_gradient_descent_1d_gif(
         ax.plot(
             trajectory[: i + 1], losses[: i + 1], color="red", alpha=0.5, linewidth=1
         )
-        ax.scatter(
-            trajectory[: i + 1], losses[: i + 1], color="red", s=35, alpha=0.6
-        )
+        ax.scatter(trajectory[: i + 1], losses[: i + 1], color="red", s=35, alpha=0.6)
         ax.scatter(trajectory[i], losses[i], color="darkorange", s=90, zorder=5)
         ax.set_xlim(-6, 6)
         ax.set_ylim(curve.min() - 0.5, curve.max() + 0.5)
@@ -363,7 +374,11 @@ def plot_gradient_descent_1d_gif(
     # Quarto's HTML renderer does not pick up embedded image/gif outputs, so we
     # emit an <img> tag with the GIF inlined as a base64 data URI instead.
     gif_b64 = base64.b64encode(gif_buf.getvalue()).decode("ascii")
-    display(HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="Gradient descent over time">'))
+    display(
+        HTML(
+            f'<img src="data:image/gif;base64,{gif_b64}" alt="Gradient descent over time">'
+        )
+    )
 
 
 plot_gradient_descent_1d_gif(loss, trajectory)
@@ -575,7 +590,9 @@ def plot_gradient_descent_2d3d_gif(
     # emit an <img> tag with the GIF inlined as a base64 data URI instead.
     gif_b64 = base64.b64encode(gif_buf.getvalue()).decode("ascii")
     display(
-        HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="Gradient descent 2D/3D">')
+        HTML(
+            f'<img src="data:image/gif;base64,{gif_b64}" alt="Gradient descent 2D/3D">'
+        )
     )
 
 
@@ -797,9 +814,9 @@ fig, ax = plt.subplots(figsize=(10, 2.5))
 ax.axis("off")
 
 segments = [
-    (0.05, 0.35, 0.55, "Train", "fit parameters", "#88c0d0"),
-    (0.62, 0.35, 0.20, "Validation", "choose hyperparameters", "#ebcb8b"),
-    (0.84, 0.35, 0.11, "Test", "final estimate", "#bf616a"),
+    (0.05, 0.35, 0.45, "Train", "fit parameters", "#88c0d0"),
+    (0.52, 0.35, 0.25, "Validation", "choose hyperparameters", "#ebcb8b"),
+    (0.79, 0.35, 0.20, "Test", "final estimate", "#bf616a"),
 ]
 
 for x, y, w, label, subtitle, color in segments:
@@ -1188,9 +1205,7 @@ def plot_polynomial_degree_gif(degrees=None, seconds=15.0, hold_seconds=1.2):
     # Quarto's HTML renderer does not pick up embedded image/gif outputs, so we
     # emit an <img> tag with the GIF inlined as a base64 data URI instead.
     gif_b64 = base64.b64encode(gif_buf.getvalue()).decode("ascii")
-    display(
-        HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="Model complexity">')
-    )
+    display(HTML(f'<img src="data:image/gif;base64,{gif_b64}" alt="Model complexity">'))
 
 
 plot_polynomial_degree_gif()
