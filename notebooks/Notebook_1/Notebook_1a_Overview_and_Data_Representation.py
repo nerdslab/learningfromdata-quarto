@@ -831,45 +831,42 @@ import numpy as np
 
 
 def plot_matrix_flow_and_morph_gif(
-    A,
-    title="Matrix Transformation",
-    grid_size=9,
-    lim=3,
-    n_frames=24,
-    seconds=2.5,
-    hold_seconds=1.0,
+    A, title="Matrix Transformation", lim=3, n_frames=24, seconds=2.5, hold_seconds=1.0
 ):
     """
-    Left panel: the static flow field for A (for reference).
-    Right panel: an animated GIF of the grid morphing continuously from the
-    identity (t=0) to the fully applied matrix A (t=1). The first and last
-    frames (t=0 and t=1) linger for `hold_seconds` so the viewer has time to
-    register the "before" and "after" states.
+    Left panel: the static flow field for A, on a unit grid (..., -1, 0, 1, ...).
+    Right panel: an animated GIF of a much bigger unit grid morphing from the
+    identity (t=0) to the fully applied matrix A (t=1) -- big enough that it
+    still looks like an infinite grid filling the plot after stretching.
     """
     import io
 
     from PIL import Image
 
-    grid_x, grid_y = np.meshgrid(
-        np.linspace(-2, 2, grid_size), np.linspace(-2, 2, grid_size)
-    )
+    # Left panel: one point per integer coordinate, e.g. (-2,-2), (-2,-1), ..., (2,2).
+    coords = np.arange(-lim, lim + 1)
+    grid_x, grid_y = np.meshgrid(coords, coords)
     points = np.stack([grid_x.flatten(), grid_y.flatten()], axis=1)
 
     displacement = (A @ points.T).T - points
     arrow_length = np.linalg.norm(displacement, axis=1)
 
-    # Grid lines (not just points) so the right panel shows the grid itself
-    # warping as the matrix is applied, not just where the nodes land. Span the
-    # full plot extent (-lim to lim), not just the range of the sample points.
-    line_coords = np.linspace(-lim, lim, grid_size)
-    fine = np.linspace(-lim, lim, 25)
-    grid_lines = [np.stack([fine, np.full_like(fine, c)], axis=1) for c in line_coords]
-    grid_lines += [np.stack([np.full_like(fine, c), fine], axis=1) for c in line_coords]
+    # Right panel: same unit spacing, but a much bigger extent, so the warped
+    # grid still fills the plot after stretching -- no per-matrix tuning needed.
+    big_coords = np.arange(-5 * lim, 5 * lim + 1)
+    big_x, big_y = np.meshgrid(big_coords, big_coords)
+    warp_points = np.stack([big_x.flatten(), big_y.flatten()], axis=1)
+
+    # A linear map keeps straight lines straight, so each grid line only needs
+    # its two endpoints -- no fine sampling required.
+    ends = np.array([big_coords[0], big_coords[-1]])
+    grid_lines = [np.array([[ends[0], c], [ends[1], c]]) for c in big_coords]
+    grid_lines += [np.array([[c, ends[0]], [c, ends[1]]]) for c in big_coords]
 
     frames = []
     for t in np.linspace(0, 1, n_frames):
         A_t = (1 - t) * np.eye(2) + t * A
-        transformed = (A_t @ points.T).T
+        transformed = (A_t @ warp_points.T).T
 
         fig, (ax_flow, ax_grid) = plt.subplots(1, 2, figsize=(11, 5.5))
 
